@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPF Watch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* Layout: three columns on desktop (story · watch · simulator), stacked on phones.
+   The watch itself is always dark, like watchOS; the page around it follows the viewer's theme. */
+:root {
+  --bg: #E6EEF4;
+  --bg-glow: rgba(255, 176, 32, .28);
+  --surface: #FFFFFF;
+  --surface-2: #F1F5F8;
+  --ink: #13202C;
+  --muted: #576877;
+  --line: #D2DDE6;
+  --accent: #C96A00;
+  --accent-soft: rgba(255, 159, 10, .16);
+  --accent-ink: #FFFFFF;
+  --focus: #1F6FD1;
+
+  --sf: -apple-system, "SF Pro Text", BlinkMacSystemFont, "Figtree", system-ui, sans-serif;
+  --sfr: ui-rounded, "SF Pro Rounded", "Nunito", -apple-system, system-ui, sans-serif;
+
+  /* watchOS system colors (dark appearance) */
+  --w-green: #30D158;
+  --w-yellow: #FFD60A;
+  --w-orange: #FF9F0A;
+  --w-red: #FF453A;
+  --w-purple: #BF5AF2;
+  --w-blue: #0A84FF;
+  --w-tint: #FFC933;
+  --w-row: #222224;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B121A; --bg-glow: rgba(255, 159, 10, .14); --surface: #131D27; --surface-2: #1A2631;
+    --ink: #E7EDF2; --muted: #93A3B2; --line: #253341; --accent: #FFB23E; --accent-soft: rgba(255, 178, 62, .14);
+    --accent-ink: #1B1205; --focus: #6AB0FF; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B121A; --bg-glow: rgba(255, 159, 10, .14); --surface: #131D27; --surface-2: #1A2631;
+  --ink: #E7EDF2; --muted: #93A3B2; --line: #253341; --accent: #FFB23E; --accent-soft: rgba(255, 178, 62, .14);
+  --accent-ink: #1B1205; --focus: #6AB0FF; color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 var(--sf);
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* ---------- Page layout ---------- */
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-block: 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.stage::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: min(720px, 100%); aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, var(--bg-glow), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.stage > * { position: relative; z-index: 1; min-width: 0; }
+
+.intro { max-width: 380px; justify-self: end; display: grid; gap: 18px; }
+.eyebrow { font: 600 12px/1 var(--sf); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0; }
+.intro h1 { font: 800 44px/1 var(--sfr); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); }
+.intro h2 { font: 700 13px/1 var(--sf); letter-spacing: .06em; text-transform: uppercase; margin: 6px 0 0; color: var(--ink); }
+
+.moods { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.mood {
+  display: grid; justify-items: center; gap: 4px;
+  padding: 8px 2px 6px; border-radius: 14px;
+  background: transparent; border: 1px solid transparent;
+  font: 500 11.5px/1.2 var(--sf); color: var(--muted); text-align: center;
+}
+.mood:hover { background: var(--surface); border-color: var(--line); }
+.mood svg { width: 44px; height: 44px; }
+.mood b { display: block; font-weight: 700; color: var(--ink); }
+
+.howto { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.howto li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; color: var(--muted); font-size: 14px; }
+.howto li svg { width: 18px; height: 18px; margin-top: 2px; color: var(--accent); }
+.howto b { color: var(--ink); font-weight: 600; }
+
+/* ---------- Device ---------- */
+.device-wrap { justify-self: center; outline: none; border-radius: 40px; }
+.device-wrap:focus-visible { outline: 2px solid var(--focus); outline-offset: 8px; }
+.device { position: relative; width: 250px; height: 400px; transform-origin: 0 0; }
+.band {
+  position: absolute; left: 50%; width: 152px; margin-left: -80px; height: 92px; z-index: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1.5px, rgba(0,0,0,.06) 1.5px 3px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.05) 0 2px, transparent 2px 5px),
+    linear-gradient(90deg, #D9692C, #F28A3E 18%, #F59A4A 50%, #F28A3E 82%, #D9692C);
+}
+.band-top { top: 0; border-radius: 10px 10px 0 0; -webkit-mask-image: linear-gradient(transparent, #000 45%); mask-image: linear-gradient(transparent, #000 45%); }
+.band-bottom { bottom: 0; border-radius: 0 0 10px 10px; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
+.case {
+  position: absolute; left: 0; top: 60px; width: 233px; height: 279px; z-index: 1;
+  border-radius: 66px;
+  background: linear-gradient(140deg, #E4DFD6 0%, #B4AEA3 30%, #8E887E 55%, #BDB7AC 80%, #D8D3C9 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255,255,255,.55),
+    inset 0 -4px 8px rgba(0,0,0,.3),
+    inset 0 4px 6px rgba(255,255,255,.35),
+    0 24px 48px rgba(20, 30, 40, .35),
+    0 6px 14px rgba(20, 30, 40, .25);
+}
+.case.buzz { animation: buzz .38s linear; }
+@keyframes buzz {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-1.6px) rotate(-.3deg); }
+  35% { transform: translateX(1.6px) rotate(.3deg); }
+  55% { transform: translateX(-1.1px); }
+  75% { transform: translateX(1.1px); }
+}
+.bezel { position: absolute; inset: 8px; border-radius: 58px; background: #050505; box-shadow: inset 0 0 0 1px #2A2A2A; }
+.crown-guard { position: absolute; right: -5px; top: 58px; width: 8px; height: 76px; border-radius: 4px; background: linear-gradient(90deg, #8D877D, #C9C3B8 60%, #9C968B); }
+.crown {
+  position: absolute; right: -13px; top: 72px; width: 14px; height: 46px; padding: 0; border: 0; border-radius: 5px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 1.4px, transparent 1.4px 3.2px),
+    linear-gradient(90deg, #A39D92, #E2DDD4 45%, #8C867C);
+  background-position: 0 var(--crown-shift, 0px), 0 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.15), 0 2px 4px rgba(0,0,0,.25);
+}
+.crown:active { transform: translateX(-1.5px); }
+.crown::after { content: ""; position: absolute; right: 2px; top: 50%; width: 4px; height: 10px; margin-top: -5px; border-radius: 2px; background: #FF6A1F; opacity: .9; }
+.side-btn { position: absolute; right: -6px; top: 150px; width: 7px; height: 54px; border-radius: 3px; background: linear-gradient(90deg, #8F897F, #CFC9BE 60%, #9A948A); }
+.action-btn { position: absolute; left: -6px; top: 86px; width: 7px; height: 42px; border-radius: 3px; background: linear-gradient(90deg, #E2521A, #FF7A2E); }
+
+/* ---------- Watch screen (205 × 251 pt, Apple Watch Ultra) ---------- */
+.screen {
+  position: absolute; left: 14px; top: 14px; width: 205px; height: 251px;
+  border-radius: 42px; overflow: hidden; background: #000; color: #fff;
+  font: 400 15px/1.25 var(--sf); letter-spacing: -.1px;
+  -webkit-user-select: none; user-select: none; touch-action: none;
+  isolation: isolate;
+  clip-path: inset(0 round 42px);
+}
+.view { position: absolute; inset: 0; }
+.view.push-in { animation: pushIn .38s cubic-bezier(.22,1,.36,1); }
+.view.pop-in { animation: popIn .38s cubic-bezier(.22,1,.36,1); }
+.view.zoom-in { animation: zoomIn .42s cubic-bezier(.22,1,.36,1); }
+@keyframes pushIn { from { transform: translateX(40%); opacity: 0; } }
+@keyframes popIn { from { transform: translateX(-30%); opacity: 0; } }
+@keyframes zoomIn { from { transform: scale(.82); opacity: 0; filter: blur(4px); } }
+
+.topbar { position: absolute; left: 0; right: 0; top: 0; height: 46px; z-index: 6; pointer-events: none; }
+.topbar > * { pointer-events: auto; }
+.topbar.fade::before { content: ""; position: absolute; inset: 0 0 -10px; background: linear-gradient(#000 60%, rgba(0,0,0,0)); pointer-events: none; }
+.tb-time { position: absolute; right: 19px; top: 10px; font: 600 15px/1 var(--sf); font-variant-numeric: tabular-nums; letter-spacing: -.2px; }
+.tb-title { position: absolute; right: 19px; top: 28px; font: 600 13px/1 var(--sf); color: var(--w-tint); white-space: nowrap; transition: color .6s; }
+.glass {
+  border: 0; color: #fff;
+  background: rgba(255,255,255,.14);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  box-shadow:
+    inset 0 1px .5px rgba(255,255,255,.38),
+    inset 0 -.5px .5px rgba(255,255,255,.16),
+    inset 0 0 0 .5px rgba(255,255,255,.12),
+    0 4px 12px rgba(0,0,0,.28);
+  transition: transform .18s cubic-bezier(.3,1.5,.5,1), background .2s;
+}
+.glass:active, .glass.pressed { transform: scale(.94); background: rgba(255,255,255,.24); }
+.circle-btn { position: absolute; left: 13px; top: 9px; width: 32px; height: 32px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
+.circle-btn svg { width: 17px; height: 17px; }
+.capsule { width: 100%; height: 40px; padding: 0 14px; border-radius: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; font: 600 15px/1 var(--sf); }
+.capsule svg { width: 16px; height: 16px; flex: none; }
+.capsule.prominent { background: var(--w-green); color: #000; box-shadow: inset 0 1px .5px rgba(255,255,255,.55), 0 4px 14px rgba(48,209,88,.35); }
+.capsule.prominent:active { background: #4BE071; }
+
+.page-dots { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: grid; gap: 3px; z-index: 6; }
+.page-dots i { width: 4px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.35); transition: height .3s, background .3s; }
+.page-dots i.on { height: 10px; background: #fff; }
+
+.pages { position: absolute; inset: 0; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+.page { position: absolute; left: 0; width: 205px; height: 251px; overflow: hidden; }
+.page:nth-child(2) { top: 251px; }
+.page:nth-child(3) { top: 502px; }
+
+/* Now */
+.glow { position: absolute; left: 50%; top: 16px; width: 200px; height: 170px; margin-left: -100px; border-radius: 50%; background: radial-gradient(closest-side, var(--glow, #FF9F0A), transparent); opacity: .34; filter: blur(4px); transition: background 1s; pointer-events: none; }
+.ring-wrap { position: absolute; left: 50%; top: 40px; width: 110px; height: 110px; margin-left: -55px; }
+.ring-wrap > svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.ring-track { fill: none; stroke-width: 8; opacity: .22; transition: stroke .6s; }
+.ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke .6s; filter: drop-shadow(0 0 3px rgba(0,0,0,.6)); }
+.ring-wrap.due .ring-track { animation: duePulse 1.2s ease-in-out infinite; }
+@keyframes duePulse { 50% { opacity: .6; } }
+.ring-sun { position: absolute; inset: 13px; }
+.ring-sun svg { width: 100%; height: 100%; overflow: visible; }
+.status { position: absolute; left: 0; right: 0; top: 154px; text-align: center; }
+.status-big { font: 800 22px/1.05 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -.2px; transition: color .4s; }
+.status-cap { margin-top: 2px; font: 500 12px/1.2 var(--sf); color: rgba(255,255,255,.6); }
+.home-btn { position: absolute; left: 14px; right: 14px; bottom: 10px; width: auto; }
+
+/* UV forecast */
+.uv-head { position: absolute; left: 14px; right: 16px; top: 46px; display: flex; align-items: center; gap: 10px; }
+.uv-num { font: 900 46px/.9 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -1px; min-width: 32px; transition: color .6s; }
+.uv-cat { font: 600 16px/1.1 var(--sf); transition: color .6s; }
+.uv-peak { font: 500 12px/1.2 var(--sf); color: rgba(255,255,255,.6); }
+.uv-scale { position: absolute; left: 14px; right: 16px; top: 102px; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--w-green) 0%, var(--w-green) 18%, var(--w-yellow) 30%, var(--w-orange) 52%, var(--w-red) 70%, var(--w-purple) 92%); }
+.uv-scale i { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px #000; transition: left .4s; }
+.chart { position: absolute; left: 14px; right: 16px; top: 116px; height: 54px; display: flex; align-items: flex-end; gap: 3px; }
+.chart i { flex: 1; min-height: 2px; border-radius: 3px 3px 1.5px 1.5px; opacity: .5; transition: height .4s, background .4s, opacity .3s; }
+.chart i.now { opacity: 1; box-shadow: 0 0 0 1.5px #fff; }
+.chart-x { position: absolute; left: 14px; right: 16px; top: 174px; display: flex; gap: 3px; font: 500 10.5px/1 var(--sf); color: rgba(255,255,255,.5); }
+.chart-x span { flex: 1; text-align: center; white-space: nowrap; }
+.uv-window { position: absolute; left: 14px; right: 16px; bottom: 14px; padding: 7px 8px; white-space: nowrap; border-radius: 14px; font: 500 12px/1.25 var(--sf); text-align: center; }
+.uv-window b { font-weight: 600; color: var(--w-tint); }
+
+/* Today */
+.card { position: absolute; left: 10px; right: 14px; border-radius: 18px; background: var(--w-row); padding: 9px 12px; }
+.card-label { font: 500 12px/1.2 var(--sf); color: rgba(255,255,255,.6); }
+.card-value { font: 800 22px/1.1 var(--sfr); font-variant-numeric: tabular-nums; }
+.card-value small { font: 500 12px var(--sf); color: rgba(255,255,255,.6); letter-spacing: 0; }
+.dose-track { height: 6px; margin-top: 6px; border-radius: 3px; background: rgba(255,255,255,.14); overflow: hidden; }
+.dose-track i { display: block; height: 100%; width: 0; border-radius: 3px; transition: width .4s, background .4s; }
+.dose-foot { margin-top: 5px; font: 500 11px/1.2 var(--sf); color: rgba(255,255,255,.5); }
+.tiles { position: absolute; left: 10px; right: 14px; top: 140px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tiles .card { position: static; padding: 8px 10px; }
+.tiles .card-value { font-size: 18px; }
+
+/* Lists (Settings / pickers) */
+.list { position: absolute; inset: 0; overflow-y: auto; padding: 48px 10px 26px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: none; }
+.list::-webkit-scrollbar { display: none; }
+.row { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 50px; padding: 8px 12px; border: 0; border-radius: 16px; background: var(--w-row); color: #fff; text-align: left; flex: none; transition: transform .15s, background .15s; }
+.row:active { transform: scale(.97); background: #2E2E31; }
+.row-text { flex: 1; min-width: 0; }
+.row-title { font: 400 15px/1.2 var(--sf); }
+.row-sub { font: 400 13px/1.2 var(--sf); color: rgba(255,255,255,.55); margin-top: 1px; }
+.row .chev { width: 8px; height: 13px; color: rgba(255,255,255,.4); flex: none; }
+.row .check { width: 16px; height: 16px; color: var(--w-green); flex: none; }
+.list-h { padding: 4px 8px 0; font: 600 13px/1.2 var(--sf); flex: none; }
+.list-foot { padding: 0 8px 4px; font: 400 12px/1.3 var(--sf); color: rgba(255,255,255,.5); flex: none; }
+.tg { position: relative; width: 42px; height: 26px; border-radius: 13px; background: #3A3A3C; flex: none; transition: background .25s; }
+.tg::after { content: ""; position: absolute; left: 2px; top: 2px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .25s cubic-bezier(.3,1.4,.5,1); }
+.tg.on { background: var(--w-green); }
+.tg.on::after { left: 18px; }
+
+/* Watch face / Smart Stack */
+.face-date { position: absolute; left: 19px; top: 10px; font: 600 15px/1 var(--sf); letter-spacing: .2px; }
+.widget { position: absolute; left: 10px; right: 10px; top: 36px; height: 86px; padding: 9px 12px; border: 0; border-radius: 22px; text-align: left; color: #fff; overflow: hidden; background: linear-gradient(170deg, #2F7DDB, #5DB2F0); transition: background .8s; }
+.widget:active { transform: scale(.97); }
+.widget-label { font: 600 13px/1.2 var(--sf); }
+.widget-big { font: 800 28px/1.05 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -.3px; }
+.widget-sub { font: 600 13px/1.2 var(--sf); opacity: .92; }
+.widget-sun { position: absolute; right: 4px; top: 6px; width: 64px; height: 64px; }
+.widget-sun svg { width: 100%; height: 100%; overflow: visible; }
+.comps { position: absolute; left: 10px; right: 10px; top: 128px; height: 66px; border-radius: 22px; background: var(--w-row); display: flex; align-items: center; justify-content: space-around; padding: 0 6px; }
+.comp { position: relative; width: 50px; height: 50px; border-radius: 50%; background: #000; display: grid; place-items: center; }
+.comp > svg.ring { position: absolute; inset: 3px; width: 44px; height: 44px; transform: rotate(-90deg); }
+.comp-in { position: relative; text-align: center; line-height: 1; }
+.comp-in b { display: block; font: 800 15px/1 var(--sfr); font-variant-numeric: tabular-nums; }
+.comp-in span { display: block; font: 700 7.5px/1 var(--sf); letter-spacing: .4px; color: rgba(255,255,255,.65); margin-bottom: 2px; }
+.comp-sun { width: 26px; height: 26px; }
+.comp-sun svg { width: 100%; height: 100%; overflow: visible; }
+.all-apps { position: absolute; left: 50%; top: 202px; width: 112px; height: 32px; margin-left: -56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 5px; font: 500 13px/1 var(--sf); padding: 0; }
+.all-apps svg { width: 13px; height: 13px; }
+
+/* Notifications & sheets */
+.overlay { position: absolute; inset: 0; z-index: 20; background: #000; }
+.blobs { position: absolute; inset: -30px; pointer-events: none; filter: blur(18px); opacity: .55;
+  background:
+    radial-gradient(90px 80px at 25% 30%, var(--blob-a, #FF9F0A), transparent 70%),
+    radial-gradient(90px 90px at 80% 70%, var(--blob-b, #0A84FF), transparent 70%),
+    radial-gradient(70px 70px at 70% 20%, var(--blob-c, #FF453A), transparent 70%);
+  animation: drift 9s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translate(8px, -6px) rotate(8deg); } }
+.short { display: grid; justify-items: center; align-content: start; padding: 26px 14px 0; text-align: center; cursor: pointer; }
+.app-icon { position: relative; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 35%, #8FD6FF, #3A9BEA 55%, #1E6FD0); box-shadow: inset 0 1px 1px rgba(255,255,255,.5); }
+.app-icon svg { width: 82%; height: 82%; overflow: visible; }
+.short .app-icon { width: 94px; height: 94px; animation: iconIn .5s cubic-bezier(.3,1.5,.5,1); }
+@keyframes iconIn { from { transform: scale(.4); opacity: 0; } }
+.short h3 { margin: 12px 0 2px; font: 600 17px/1.15 var(--sf); position: relative; }
+.short p { margin: 0; font: 400 13px/1.3 var(--sf); color: rgba(255,255,255,.85); position: relative; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.long { overflow-y: auto; scrollbar-width: none; }
+.long::-webkit-scrollbar { display: none; }
+.long-inner { position: relative; padding: 46px 10px 18px; display: flex; flex-direction: column; gap: 6px; }
+.long .app-icon { position: absolute; left: 14px; top: 8px; width: 32px; height: 32px; }
+.platter { padding: 9px 12px 11px; border-radius: 20px; background: rgba(70,70,76,.5); -webkit-backdrop-filter: blur(16px) saturate(180%); backdrop-filter: blur(16px) saturate(180%); box-shadow: inset 0 1px .5px rgba(255,255,255,.22); }
+.platter-meta { display: flex; justify-content: space-between; font: 500 11px/1.2 var(--sf); color: rgba(255,255,255,.55); }
+.platter h4 { margin: 3px 0 2px; font: 600 15px/1.2 var(--sf); }
+.platter p { margin: 0; font: 400 14px/1.3 var(--sf); color: rgba(255,255,255,.9); }
+.long .capsule { flex: none; }
+
+.sheet { display: grid; justify-items: center; align-content: start; padding: 30px 14px 0; text-align: center; }
+.sheet .sheet-sun { width: 100px; height: 100px; }
+.sheet .sheet-sun svg { width: 100%; height: 100%; overflow: visible; }
+.sheet h3 { margin: 6px 0 2px; font: 800 21px/1.1 var(--sfr); color: var(--w-green); position: relative; }
+.sheet p { margin: 0; font: 400 13px/1.3 var(--sf); color: rgba(255,255,255,.75); position: relative; }
+
+/* Sun character animation */
+.sun .rays { transform-box: fill-box; transform-origin: center; animation: spin 40s linear infinite; }
+.sun--hot .rays, .sun--alarmed .rays { animation-duration: 14s; }
+.sun .body { animation: bob 3.2s ease-in-out infinite; }
+.sun--sleepy .body { animation-duration: 5s; }
+.sun--alarmed .body { transform-box: fill-box; transform-origin: center; animation: wiggle .5s ease-in-out infinite; }
+.sun .zz text { animation: zz 2.4s ease-in-out infinite; }
+.sun .zz text + text { animation-delay: .8s; }
+.sun .sparkle { transform-box: fill-box; transform-origin: center; animation: twinkle 1.4s ease-in-out infinite; }
+.sun .sparkle:nth-of-type(2) { animation-delay: .45s; }
+.sun .sparkle:nth-of-type(3) { animation-delay: .9s; }
+.sun .drop { animation: drip 1.8s ease-in infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes bob { 50% { transform: translateY(-1.6px); } }
+@keyframes wiggle { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+@keyframes zz { 0% { opacity: 0; transform: translate(0, 4px); } 30%, 70% { opacity: 1; } 100% { opacity: 0; transform: translate(4px, -6px); } }
+@keyframes twinkle { 50% { transform: scale(.5); opacity: .5; } }
+@keyframes drip { 0% { transform: translateY(-2px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(5px); opacity: 0; } }
+
+/* ---------- Simulator panel ---------- */
+.panel { max-width: 340px; justify-self: start; display: grid; gap: 14px; width: 100%; }
+.group { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; }
+.group-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.group h2 { margin: 0; font: 700 12px/1 var(--sf); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.clock-row { display: flex; align-items: center; gap: 12px; }
+.clock { font: 800 30px/1 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -.5px; flex: 1; }
+.clock small { font: 600 14px var(--sf); color: var(--muted); margin-left: 4px; }
+.paused-note { font: 500 12px/1.2 var(--sf); color: var(--accent); }
+.play { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
+.play svg { width: 16px; height: 16px; }
+.seg { display: flex; padding: 3px; gap: 3px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg button { flex: 1; min-width: 0; padding: 6px 4px; border: 0; border-radius: 9px; background: transparent; font: 600 13px/1.15 var(--sf); color: var(--muted); }
+.seg button small { display: block; font: 500 11px/1.2 var(--sf); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 1px var(--line); }
+.range { width: 100%; accent-color: var(--accent); margin: 0; }
+.range-scale { display: flex; justify-content: space-between; font: 500 11px/1 var(--sf); color: var(--muted); font-variant-numeric: tabular-nums; }
+.field-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.uv-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font: 600 13px/1.2 var(--sf); white-space: nowrap; }
+.uv-chip i { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font: 800 10.5px/1 var(--sfr); font-style: normal; color: #000; }
+.link-btn { border: 0; background: none; padding: 0; color: var(--accent); font: 600 13px/1.2 var(--sf); }
+.link-btn:disabled { color: var(--muted); opacity: .6; cursor: default; }
+.switch { position: relative; width: 44px; height: 26px; flex: none; appearance: none; -webkit-appearance: none; margin: 0; border-radius: 13px; background: var(--line); cursor: pointer; transition: background .2s; }
+.switch::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: left .2s; }
+.switch:checked { background: #2FBF55; }
+.switch:checked::after { left: 21px; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.act { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font: 600 13px/1.2 var(--sf); text-align: left; }
+.act:hover { border-color: var(--accent); }
+.act svg { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.log { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; max-height: 168px; overflow-y: auto; }
+.log li { display: grid; grid-template-columns: 62px 1fr; gap: 8px; color: var(--muted); }
+.log li time { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+.log li.haptic span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: 1px; }
+.log-empty { color: var(--muted); font-size: 13px; }
+
+@media (max-width: 1080px) {
+  .stage { grid-template-columns: minmax(0, 1fr); gap: 28px; min-height: 0; }
+  .device-wrap { order: -1; }
+  .intro, .panel { justify-self: center; max-width: 520px; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="stage">
+  <section class="intro" aria-labelledby="intro-title">
+    <p class="eyebrow">watchOS 26 prototype</p>
+    <h1 id="intro-title">SPF Watch</h1>
+    <p>Sunny watches the UV index and taps your wrist when your sunscreen has worn off. The reapply timer shortens as UV climbs: every 2 hours at low and moderate UV, 100 minutes at high, 90 at very high and 80 at extreme. Swimming cuts it short.</p>
+
+    <h2>Sunny's moods</h2>
+    <div class="moods" id="moods"></div>
+
+    <h2>Try it</h2>
+    <ul class="howto">
+      <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6" y="2" width="8" height="16" rx="3"/><path d="M10 6v3"/></svg><span><b>Scroll</b> over the watch or <b>swipe</b> up and down to turn the Digital Crown between Now, Forecast and Today.</span></li>
+      <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg><span><b>Click the crown</b> to see the watch face with the Smart Stack widget and complications.</span></li>
+      <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 10a6 6 0 0 1 12 0v3l1.5 2h-15L4 13z"/><path d="M8 17.5a2 2 0 0 0 4 0"/></svg><span><b>Let time run</b> and a reminder arrives as a Short Look, then a Long Look with actions.</span></li>
+    </ul>
+  </section>
+
+  <div class="device-wrap" id="deviceWrap" tabindex="0" aria-label="Apple Watch prototype. Use arrow keys to turn the Digital Crown, Escape to go back.">
+    <div class="device" id="device">
+      <div class="band band-top"></div>
+      <div class="band band-bottom"></div>
+      <div class="case" id="case">
+        <div class="crown-guard"></div>
+        <button class="crown" id="crown" aria-label="Digital Crown: press for watch face"></button>
+        <div class="side-btn"></div>
+        <div class="action-btn"></div>
+        <div class="bezel"></div>
+        <div class="screen" id="screen">
+
+          <!-- App: vertical pages -->
+          <div class="view" id="v-app">
+            <div class="pages" id="pages">
+              <section class="page" aria-label="Now">
+                <div class="glow" id="glow"></div>
+                <div class="ring-wrap" id="ringWrap">
+                  <svg viewBox="0 0 110 110"><circle class="ring-track" id="ringTrack" cx="55" cy="55" r="51"/><circle class="ring-fill" id="ringFill" cx="55" cy="55" r="51" pathLength="100" stroke-dasharray="0 100"/></svg>
+                  <div class="ring-sun" id="homeSun"></div>
+                </div>
+                <div class="status">
+                  <div class="status-big" id="statusBig">–</div>
+                  <div class="status-cap" id="statusCap"></div>
+                </div>
+                <button class="glass capsule home-btn" id="homeBtn" data-act="apply">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 1h4v2.5H6z"/><path d="M4.5 5.2C4.5 4.5 5 4 5.7 4h4.6c.7 0 1.2.5 1.2 1.2V14a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z" opacity=".95"/></svg>
+                  <span id="homeBtnLabel">Applied SPF</span>
+                </button>
+              </section>
+
+              <section class="page" aria-label="UV forecast">
+                <div class="uv-head">
+                  <div class="uv-num" id="uvNum">0</div>
+                  <div>
+                    <div class="uv-cat" id="uvCat">Low</div>
+                    <div class="uv-peak" id="uvPeak">Peak 8 at 1 PM</div>
+                  </div>
+                </div>
+                <div class="uv-scale"><i id="uvMarker"></i></div>
+                <div class="chart" id="chart"></div>
+                <div class="chart-x" id="chartX"></div>
+                <div class="glass uv-window" id="uvWindow"></div>
+              </section>
+
+              <section class="page" aria-label="Today">
+                <div class="card" style="top: 46px">
+                  <div class="card-label">Sun dose</div>
+                  <div class="card-value" id="doseVal">0% <small>of burn limit</small></div>
+                  <div class="dose-track"><i id="doseBar"></i></div>
+                  <div class="dose-foot" id="doseFoot">Skin Type II · SPF 50</div>
+                </div>
+                <div class="tiles">
+                  <div class="card"><div class="card-label">In the sun</div><div class="card-value" id="sunTime">0m</div></div>
+                  <div class="card"><div class="card-label">Applied</div><div class="card-value" id="appCount">0×</div></div>
+                </div>
+                <div class="card" style="top: 200px; padding-block: 7px">
+                  <div class="card-label" id="lastApplied">Not applied yet today</div>
+                </div>
+              </section>
+            </div>
+            <div class="page-dots" id="dots"><i></i><i></i><i></i></div>
+            <div class="topbar">
+              <button class="glass circle-btn" data-act="settings" aria-label="Settings">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 6.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8 4.3v-1.8l-2.2-.4a6 6 0 0 0-.6-1.5l1.3-1.8-1.3-1.3-1.8 1.3a6 6 0 0 0-1.5-.6L11.5 2H8.5l-.4 2.2a6 6 0 0 0-1.5.6L4.8 3.5 3.5 4.8l1.3 1.8a6 6 0 0 0-.6 1.5L2 8.5v3l2.2.4c.1.5.3 1 .6 1.5l-1.3 1.8 1.3 1.3 1.8-1.3c.5.3 1 .5 1.5.6l.4 2.2h3l.4-2.2c.5-.1 1-.3 1.5-.6l1.8 1.3 1.3-1.3-1.3-1.8c.3-.5.5-1 .6-1.5z" fill-rule="evenodd"/></svg>
+              </button>
+              <div class="tb-time js-time">11:05</div>
+              <div class="tb-title" id="appTitle">UV 7</div>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div class="view" id="v-settings" hidden>
+            <div class="list" id="settingsList"></div>
+            <div class="topbar fade">
+              <button class="glass circle-btn" data-act="back" aria-label="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
+              <div class="tb-time js-time">11:05</div>
+              <div class="tb-title">Settings</div>
+            </div>
+          </div>
+
+          <!-- Picker -->
+          <div class="view" id="v-picker" hidden>
+            <div class="list" id="pickerList"></div>
+            <div class="topbar fade">
+              <button class="glass circle-btn" data-act="back" aria-label="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
+              <div class="tb-time js-time">11:05</div>
+              <div class="tb-title" id="pickerTitle">Skin Type</div>
+            </div>
+          </div>
+
+          <!-- Watch face with Smart Stack -->
+          <div class="view" id="v-face" hidden>
+            <div class="face-date" id="faceDate">WED 22</div>
+            <div class="tb-time js-time">11:05</div>
+            <button class="widget" id="widget" data-act="open-app" aria-label="Open SPF Watch">
+              <div class="widget-label" id="wLabel">Reapply in</div>
+              <div class="widget-big" id="wBig">42m</div>
+              <div class="widget-sub" id="wSub">UV 7 · High</div>
+              <div class="widget-sun" id="wSun"></div>
+            </button>
+            <div class="comps">
+              <div class="comp" title="UV index">
+                <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" pathLength="100" stroke-dasharray="75 100" transform="rotate(45 22 22)"/><circle id="cUvArc" cx="22" cy="22" r="19" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(45 22 22)"/></svg>
+                <div class="comp-in"><span>UV</span><b id="cUv">7</b></div>
+              </div>
+              <div class="comp" title="Sunscreen protection">
+                <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(48,209,88,.25)" stroke-width="4" id="cProtTrack"/><circle id="cProt" cx="22" cy="22" r="19" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/></svg>
+                <div class="comp-sun" id="cSun"></div>
+              </div>
+              <div class="comp" title="Time in sun">
+                <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,214,10,.22)" stroke-width="4"/><circle id="cDay" cx="22" cy="22" r="19" fill="none" stroke="#FFD60A" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/></svg>
+                <div class="comp-in"><span>MIN</span><b id="cDayVal">0</b></div>
+              </div>
+            </div>
+            <button class="glass all-apps" data-act="open-app"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="2" cy="3" r="1.3"/><circle cx="2" cy="7" r="1.3"/><circle cx="2" cy="11" r="1.3"/><rect x="5" y="2.2" width="8" height="1.6" rx=".8"/><rect x="5" y="6.2" width="8" height="1.6" rx=".8"/><rect x="5" y="10.2" width="8" height="1.6" rx=".8"/></svg>All Apps</button>
+          </div>
+
+          <!-- Short Look -->
+          <div class="overlay short" id="o-short" data-act="expand" hidden>
+            <div class="blobs"></div>
+            <div class="app-icon" id="shortIcon"></div>
+            <h3 id="shortTitle">Time to reapply</h3>
+            <p id="shortBody"></p>
+          </div>
+
+          <!-- Long Look -->
+          <div class="overlay long" id="o-long" hidden>
+            <div class="blobs"></div>
+            <div class="app-icon" id="longIcon"></div>
+            <div class="tb-time js-time" style="position:absolute; z-index:2">11:05</div>
+            <div class="long-inner">
+              <div class="platter">
+                <div class="platter-meta"><span>SPF Watch</span><span>now</span></div>
+                <h4 id="longTitle">Time to reapply</h4>
+                <p id="longBody"></p>
+              </div>
+              <button class="capsule prominent" data-act="notif-primary" id="longPrimary">I Reapplied</button>
+              <button class="glass capsule" data-act="notif-snooze" id="longSnooze">Remind in 15 min</button>
+              <button class="glass capsule" data-act="notif-dismiss">Dismiss</button>
+            </div>
+          </div>
+
+          <!-- Applied confirmation -->
+          <div class="overlay sheet" id="o-applied" data-act="applied-close" hidden>
+            <div class="blobs" style="--blob-a:#30D158; --blob-b:#FFD60A; --blob-c:#64D2FF"></div>
+            <div class="sheet-sun" id="appliedSun"></div>
+            <h3>Protected!</h3>
+            <p id="appliedBody">Next reminder in 1h 40m</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel" aria-label="Simulator">
+    <section class="group">
+      <div class="group-h"><h2>Time of day</h2><span class="paused-note" id="pausedNote" hidden>Paused for notification</span></div>
+      <div class="clock-row">
+        <div class="clock" id="clock">11:05<small>AM</small></div>
+        <button class="play" id="play" aria-label="Pause"></button>
+      </div>
+      <input class="range" type="range" id="timeRange" min="300" max="1260" step="1" value="665" aria-label="Time of day">
+      <div class="range-scale"><span>5 AM</span><span>9</span><span>1 PM</span><span>5</span><span>9 PM</span></div>
+      <div class="seg" role="group" aria-label="Simulation speed" id="speedSeg">
+        <button data-speed="1">1×<small>real time</small></button>
+        <button data-speed="60">60×<small>1 min / sec</small></button>
+        <button data-speed="300">300×<small>5 min / sec</small></button>
+      </div>
+    </section>
+
+    <section class="group">
+      <div class="group-h"><h2>Conditions</h2><span class="uv-chip"><i id="chipDot">7</i><span id="chipText">High</span></span></div>
+      <div class="seg" role="group" aria-label="Weather" id="weatherSeg">
+        <button data-weather="overcast">Overcast<small>peak UV 4</small></button>
+        <button data-weather="sunny">Sunny<small>peak UV 8</small></button>
+        <button data-weather="beach">Beach<small>peak UV 12</small></button>
+      </div>
+      <div class="field-row"><label for="uvRange">UV override</label><button class="link-btn" id="followBtn">Follow forecast</button></div>
+      <input class="range" type="range" id="uvRange" min="0" max="12" step="1" value="7">
+      <div class="field-row"><label for="outdoors">Outdoors</label><input class="switch" type="checkbox" id="outdoors" checked></div>
+    </section>
+
+    <section class="group">
+      <h2>Simulate</h2>
+      <div class="actions">
+        <button class="act" id="aSwim"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5S3.5 6.6 3.5 9.8a4.5 4.5 0 0 0 9 0C12.5 6.6 8 1.5 8 1.5z"/></svg>Go for a swim</button>
+        <button class="act" id="aRemind"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5v2.8L2 11h12l-1.5-2.2V6A4.5 4.5 0 0 0 8 1.5zM6.3 12.5a1.8 1.8 0 0 0 3.4 0z"/></svg>Send reminder</button>
+        <button class="act" id="aFace"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="2" width="9" height="12" rx="3"/><path d="M8 5.5V8l1.6 1" stroke-linecap="round"/></svg>Press crown</button>
+        <button class="act" id="aReset"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8a5 5 0 1 0 1.6-3.7"/><path d="M3 2.5v3h3"/></svg>Start new day</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>Wrist activity</h2>
+      <ul class="log" id="log"></ul>
+    </section>
+  </aside>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- Model ----------
+  const UV_CATS = [
+    { max: 3,  name: 'Low',       color: '#30D158', interval: 120 },
+    { max: 6,  name: 'Moderate',  color: '#FFD60A', interval: 120 },
+    { max: 8,  name: 'High',      color: '#FF9F0A', interval: 100 },
+    { max: 11, name: 'Very High', color: '#FF453A', interval: 90 },
+    { max: 99, name: 'Extreme',   color: '#BF5AF2', interval: 80 },
+  ];
+  // Fitzpatrick skin types; `base` = UV-minutes to a sunburn without protection.
+  const SKIN = [
+    { n: 'I',   d: 'Always burns, never tans',   base: 100 },
+    { n: 'II',  d: 'Burns easily, tans slowly',  base: 150 },
+    { n: 'III', d: 'Sometimes burns',            base: 250 },
+    { n: 'IV',  d: 'Rarely burns, tans well',    base: 400 },
+    { n: 'V',   d: 'Very rarely burns',          base: 600 },
+    { n: 'VI',  d: 'Almost never burns',         base: 900 },
+  ];
+  const SPFS = [15, 30, 50, 70];
+  const WEATHER = { overcast: 4.2, sunny: 8.4, beach: 11.8 };
+  const DAY_START = 300, DAY_END = 1260;
+
+  const fresh = () => ({
+    minutes: 11 * 60 + 5, playing: true, speed: 60,
+    weather: 'sunny', uvOverride: null, outdoors: true,
+    protection: 0.42, log: [9 * 60 + 52],
+    skin: 1, spf: 50, waterResistant: true, reminders: true, onlyUV3: true,
+    sunMinutes: 68, dose: 0.17,
+    page: 0, view: 'app', picker: null,
+    overlay: null, notifKind: null,
+    flags: { start: true, reapply: false, shade: false },
+    snoozeUntil: null, events: [],
+  });
+  let S = fresh();
+
+  const uvCat = uv => UV_CATS.find(c => Math.round(uv) < c.max);
+  const forecast = (min, peak = WEATHER[S.weather]) => {
+    const h = min / 60;
+    if (h <= 6.5 || h >= 19.5) return 0;
+    return peak * Math.pow(Math.sin(Math.PI * (h - 6.5) / 13), 1.6);
+  };
+  const currentUV = () => S.uvOverride ?? forecast(S.minutes);
+  const intervalFor = uv => uvCat(uv).interval;
+  const remaining = () => S.protection * intervalFor(currentUV());
+
+  const pad = n => String(n).padStart(2, '0');
+  const fmtClock = m => { m = Math.floor(m); const h = Math.floor(m / 60) % 24; return `${(h % 12) || 12}:${pad(m % 60)}`; };
+  const ampm = m => (Math.floor(m / 60) % 24) < 12 ? 'AM' : 'PM';
+  const fmtClockAP = m => `${fmtClock(m)} ${ampm(m)}`;
+  const fmtDur = m => { m = Math.max(0, Math.ceil(m)); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${pad(m % 60)}m`; };
+  const fmtHour = h => `${(h % 12) || 12}`;
+
+  // ---------- Sunny, the sun character ----------
+  let uid = 0;
+  const INK = '#5B2C0F';
+  function sunSVG(mood, { bottle = false } = {}) {
+    const id = 'sg' + (++uid);
+    const P = {
+      sleepy:  ['#FFF4BF', '#FFDC66', '#F4B740', '#FFD45E'],
+      happy:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+      cool:    ['#FFF3A8', '#FFC933', '#FF9A14', '#FFBE36'],
+      hot:     ['#FFE68C', '#FFA22B', '#FF6E1A', '#FFAE3A'],
+      alarmed: ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
+      proud:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+    }[mood];
+    let rays = '';
+    for (let i = 0; i < 12; i++) {
+      let h = i % 2 ? 9 : 13;
+      if (mood === 'sleepy') h *= 0.7;
+      rays += `<rect x="-3.4" y="${-(33 + h)}" width="6.8" height="${h}" rx="3.4" transform="rotate(${i * 30})"/>`;
+    }
+    const cheeks = `<ellipse cx="-17.5" cy="7" rx="5" ry="3.2" fill="#FF6F7D" opacity=".5"/><ellipse cx="17.5" cy="7" rx="5" ry="3.2" fill="#FF6F7D" opacity=".5"/>`;
+    const eyes = `<g fill="${INK}"><ellipse cx="-10" cy="-3" rx="3.3" ry="4.3"/><ellipse cx="10" cy="-3" rx="3.3" ry="4.3"/></g><g fill="#fff"><circle cx="-9" cy="-4.7" r="1.3"/><circle cx="11" cy="-4.7" r="1.3"/></g>`;
+    const smile = `<path d="M-7 7 Q0 14 7 7" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>`;
+    const grin = `<path d="M-9 6 Q0 18 9 6 Z" fill="${INK}"/><path d="M-4.6 11.2 Q0 9 4.6 11.2 Q0 14.6 -4.6 11.2Z" fill="#FF7A8A"/>`;
+    const glasses = `<rect x="-21.5" y="-10" width="17.5" height="11" rx="4.5" fill="#1C1A2E"/><rect x="4" y="-10" width="17.5" height="11" rx="4.5" fill="#1C1A2E"/><rect x="-5" y="-8" width="10" height="2.4" rx="1.2" fill="#1C1A2E"/><path d="M-18 -7.2h4.5M7.5 -7.2h4.5" stroke="#fff" stroke-opacity=".75" stroke-width="1.4" stroke-linecap="round"/>`;
+    const drop = (x, y) => `<path class="drop" d="M${x} ${y - 6} C${x + 3} ${y - 1.5} ${x + 4.5} ${y + 1.5} ${x} ${y + 4} C${x - 4.5} ${y + 1.5} ${x - 3} ${y - 1.5} ${x} ${y - 6}Z" fill="#7FD3FF"/>`;
+    const star = (x, y, s) => `<path class="sparkle" d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s}Z" fill="#fff"/>`;
+
+    let face = '', extra = '';
+    switch (mood) {
+      case 'sleepy':
+        face = `<path d="M-14 -2 Q-10 2 -6 -2 M6 -2 Q10 2 14 -2" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/><path d="M-3.5 9 Q0 11.5 3.5 9" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/>` + cheeks;
+        extra = `<g class="zz" fill="#fff" font-family="ui-rounded, Nunito, sans-serif" font-weight="900"><text x="25" y="-27" font-size="11">z</text><text x="34" y="-37" font-size="8">z</text></g>`;
+        break;
+      case 'happy': face = eyes + smile + cheeks; break;
+      case 'cool': face = glasses + grin + cheeks; break;
+      case 'hot':
+        face = glasses + `<path d="M-8 9.5 q2.7 -2.6 5.3 0 t5.3 0 t5.3 0" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>` + cheeks + drop(25, -13);
+        break;
+      case 'alarmed':
+        face = `<circle cx="-10" cy="-3" r="5.8" fill="#fff"/><circle cx="10" cy="-3" r="5.8" fill="#fff"/><circle cx="-9.4" cy="-2" r="2.7" fill="${INK}"/><circle cx="9.4" cy="-2" r="2.7" fill="${INK}"/><path d="M-15.5 -11 L-6 -14.5 M15.5 -11 L6 -14.5" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="0" cy="11" rx="3.8" ry="4.6" fill="${INK}"/>` + cheeks + drop(-25, -13);
+        break;
+      case 'proud':
+        face = `<path d="M-14 -2 L-10 -6.5 L-6 -2 M6 -2 L10 -6.5 L14 -2" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` + grin + cheeks;
+        extra = star(-36, -32, 5) + star(35, -36, 4) + star(39, 24, 4.5);
+        break;
+    }
+    const bottleSVG = bottle ? `<g transform="translate(24 16) rotate(-16)"><rect x="-6.5" y="-12" width="13" height="22" rx="4" fill="#fff"/><rect x="-4.5" y="-18" width="9" height="7" rx="2" fill="#FF8A3D"/><rect x="-6.5" y="-3" width="13" height="6.5" fill="#3EC5F0"/><circle cx="-8.5" cy="3.5" r="4" fill="${P[1]}" stroke="${P[2]}" stroke-width=".8"/></g>` : '';
+
+    return `<svg class="sun sun--${mood}" viewBox="-50 -50 100 100" aria-hidden="true">
+      <defs><radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${P[0]}"/><stop offset=".55" stop-color="${P[1]}"/><stop offset="1" stop-color="${P[2]}"/></radialGradient></defs>
+      <g class="rays" fill="${P[3]}">${rays}</g>
+      <g class="body"><circle r="29" fill="url(#${id})"/><ellipse cx="-10" cy="-16" rx="8" ry="4.2" fill="#fff" opacity=".35" transform="rotate(-28 -10 -16)"/>${face}${bottleSVG}</g>
+      ${extra}</svg>`;
+  }
+  const sunCache = new WeakMap();
+  function setSun(el, mood, opts = {}) {
+    const key = mood + (opts.bottle ? '+b' : '');
+    if (sunCache.get(el) === key) return;
+    sunCache.set(el, key);
+    el.innerHTML = sunSVG(mood, opts);
+  }
+
+  // ---------- DOM ----------
+  const $ = id => document.getElementById(id);
+  const el = {
+    device: $('device'), wrap: $('deviceWrap'), kase: $('case'), screen: $('screen'), crown: $('crown'),
+    pages: $('pages'), dots: [...$('dots').children], appTitle: $('appTitle'),
+    glow: $('glow'), ringWrap: $('ringWrap'), ringTrack: $('ringTrack'), ringFill: $('ringFill'), homeSun: $('homeSun'),
+    statusBig: $('statusBig'), statusCap: $('statusCap'), homeBtn: $('homeBtn'), homeBtnLabel: $('homeBtnLabel'),
+    uvNum: $('uvNum'), uvCat: $('uvCat'), uvPeak: $('uvPeak'), uvMarker: $('uvMarker'), chart: $('chart'), chartX: $('chartX'), uvWindow: $('uvWindow'),
+    doseVal: $('doseVal'), doseBar: $('doseBar'), doseFoot: $('doseFoot'), sunTime: $('sunTime'), appCount: $('appCount'), lastApplied: $('lastApplied'),
+    views: { app: $('v-app'), settings: $('v-settings'), picker: $('v-picker'), face: $('v-face') },
+    settingsList: $('settingsList'), pickerList: $('pickerList'), pickerTitle: $('pickerTitle'),
+    faceDate: $('faceDate'), widget: $('widget'), wLabel: $('wLabel'), wBig: $('wBig'), wSub: $('wSub'), wSun: $('wSun'),
+    cUv: $('cUv'), cUvArc: $('cUvArc'), cProt: $('cProt'), cProtTrack: $('cProtTrack'), cSun: $('cSun'), cDay: $('cDay'), cDayVal: $('cDayVal'),
+    oShort: $('o-short'), oLong: $('o-long'), oApplied: $('o-applied'),
+    shortIcon: $('shortIcon'), shortTitle: $('shortTitle'), shortBody: $('shortBody'),
+    longIcon: $('longIcon'), longTitle: $('longTitle'), longBody: $('longBody'), longPrimary: $('longPrimary'), longSnooze: $('longSnooze'),
+    appliedSun: $('appliedSun'), appliedBody: $('appliedBody'),
+    clock: $('clock'), play: $('play'), timeRange: $('timeRange'), speedSeg: $('speedSeg'), weatherSeg: $('weatherSeg'),
+    uvRange: $('uvRange'), followBtn: $('followBtn'), outdoors: $('outdoors'), chipDot: $('chipDot'), chipText: $('chipText'),
+    log: $('log'), pausedNote: $('pausedNote'), times: document.getElementsByClassName('js-time'),
+  };
+  const setText = (node, v) => { if (node.textContent !== v) node.textContent = v; };
+  const setHTML = (node, v) => { if (node.innerHTML !== v) node.innerHTML = v; };
+
+  // Static chart scaffolding: 7 AM – 7 PM
+  const HOURS = Array.from({ length: 13 }, (_, i) => 7 + i);
+  el.chart.innerHTML = HOURS.map(() => '<i></i>').join('');
+  el.chartX.innerHTML = HOURS.map(h => `<span>${[9, 12, 15, 18].includes(h) ? fmtHour(h) + (h === 12 ? 'P' : '') : ''}</span>`).join('');
+  const bars = [...el.chart.children];
+  const now = new Date();
+  el.faceDate.textContent = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase() + ' ' + now.getDate();
+
+  // Mood legend in the intro
+  const MOODS = [
+    { mood: 'sleepy', label: 'UV 0–2', uv: 1 }, { mood: 'happy', label: 'UV 3–5', uv: 4 },
+    { mood: 'cool', label: 'UV 6–7', uv: 7 }, { mood: 'hot', label: 'UV 8+', uv: 9 },
+    { mood: 'alarmed', label: 'Reapply', remind: true },
+  ];
+  $('moods').innerHTML = MOODS.map((m, i) => `<button class="mood" data-i="${i}" aria-label="Show ${m.mood} mood">${sunSVG(m.mood)}<span><b>${m.mood[0].toUpperCase() + m.mood.slice(1)}</b>${m.label}</span></button>`).join('');
+  $('moods').addEventListener('click', e => {
+    const b = e.target.closest('.mood'); if (!b) return;
+    const m = MOODS[+b.dataset.i];
+    closeOverlay(); if (S.view !== 'app') showView('app', 'zoom'); setPage(0);
+    if (m.remind) return sendReminder();
+    S.uvOverride = m.uv; S.outdoors = true;
+    if (S.protection <= 0 && S.log.length) S.protection = 0.6;
+  });
+
+  // ---------- Simulation ----------
+  function advance(dm) {
+    S.minutes = Math.min(DAY_END, S.minutes + dm);
+    if (S.minutes >= DAY_END) S.playing = false;
+    const uv = currentUV();
+    if (S.protection > 0) S.protection = Math.max(0, S.protection - dm / intervalFor(uv));
+    if (S.outdoors && uv > 0.05) {
+      S.sunMinutes += dm;
+      const shield = S.protection > 0 ? Math.min(1, 3 / S.spf) : 1; // real-world SPF ≈ a third of the label
+      S.dose += dm * (uv / SKIN[S.skin].base) * shield;
+    }
+  }
+
+  function runChecks() {
+    if (S.overlay) return;
+    const uv = currentUV();
+    if (S.outdoors && S.dose >= 0.8 && !S.flags.shade) return notify('shade');
+    if (!S.reminders || !S.outdoors) return;
+    if (uv < (S.onlyUV3 ? 2.5 : 0.5)) return;
+    if (S.snoozeUntil != null && S.minutes < S.snoozeUntil) return;
+    if (!S.log.length && !S.flags.start) return notify('start');
+    if (S.log.length && S.protection <= 0 && !S.flags.reapply) return notify('reapply');
+  }
+
+  // ---------- Actions ----------
+  function haptic(label) {
+    el.kase.classList.remove('buzz'); void el.kase.offsetWidth; el.kase.classList.add('buzz');
+    if (label) logEvent(label, true);
+  }
+  function logEvent(text, isHaptic = false) {
+    S.events.unshift({ t: S.minutes, text, haptic: isHaptic });
+    S.events = S.events.slice(0, 12);
+    renderLog();
+  }
+  function renderLog() {
+    el.log.innerHTML = S.events.length
+      ? S.events.map(e => `<li class="${e.haptic ? 'haptic' : ''}"><time>${fmtClockAP(e.t)}</time><span>${e.text}</span></li>`).join('')
+      : '<li class="log-empty">Haptics and reminders show up here.</li>';
+  }
+
+  function applySunscreen() {
+    S.protection = 1;
+    S.log.push(S.minutes);
+    S.flags.reapply = false; S.flags.start = true; S.snoozeUntil = null;
+    haptic('Success tap · sunscreen logged');
+    setSun(el.appliedSun, 'proud', { bottle: true });
+    el.appliedBody.textContent = `SPF ${spfLabel()} · next reminder in ${fmtDur(remaining())}`;
+    showOverlay('applied');
+    clearTimeout(applySunscreen.t);
+    applySunscreen.t = setTimeout(() => { if (S.overlay === 'applied') closeOverlay(); }, 2200);
+  }
+  const spfLabel = () => S.spf === 70 ? '50+' : String(S.spf);
+
+  function notifCopy(kind) {
+    const uv = Math.round(currentUV()), cat = uvCat(currentUV()).name;
+    const since = S.log.length ? S.minutes - S.log[S.log.length - 1] : 0;
+    switch (kind) {
+      case 'start': return { mood: 'happy', bottle: true, title: 'UV is rising', short: `UV ${uv} · ${cat}. Time for sunscreen.`, body: `UV is ${uv} (${cat}). Put on sunscreen before you head out.`, primary: 'I Applied SPF', snooze: true };
+      case 'swim': return { mood: 'alarmed', bottle: true, title: 'Reapply after swimming', short: 'Water and towels wipe sunscreen off.', body: `Back from your swim? Water and towels wipe sunscreen off. UV is ${uv} (${cat}).`, primary: 'I Reapplied', snooze: true };
+      case 'shade': return { mood: 'hot', bottle: false, title: 'Time for some shade', short: `${Math.round(S.dose * 100)}% of today's safe sun.`, body: `You've had ${Math.round(S.dose * 100)}% of today's safe sun for Skin Type ${SKIN[S.skin].n}. Find shade or cover up.`, primary: 'OK', snooze: false };
+      default: return { mood: 'alarmed', bottle: true, title: 'Time to reapply', short: `UV ${uv} · ${cat}. Your SPF has worn off.`, body: `UV is ${uv} (${cat}). Your SPF ${spfLabel()} wore off ${fmtDur(since)} after you put it on.`, primary: 'I Reapplied', snooze: true };
+    }
+  }
+
+  let shortTimer;
+  function notify(kind) {
+    if (kind in S.flags) S.flags[kind] = true;
+    S.notifKind = kind;
+    const c = notifCopy(kind);
+    el.shortIcon.innerHTML = sunSVG(c.mood, { bottle: c.bottle });
+    el.longIcon.innerHTML = sunSVG(c.mood);
+    el.shortTitle.textContent = c.title; el.shortBody.textContent = c.short;
+    el.longTitle.textContent = c.title; el.longBody.textContent = c.body;
+    el.longPrimary.textContent = c.primary;
+    el.longSnooze.hidden = !c.snooze;
+    haptic(`Notification · ${c.title}`);
+    showOverlay('short');
+    clearTimeout(shortTimer);
+    shortTimer = setTimeout(() => { if (S.overlay === 'short') showOverlay('long'); }, 2800);
+  }
+
+  function showOverlay(name) {
+    S.overlay = name;
+    el.oShort.hidden = name !== 'short';
+    el.oLong.hidden = name !== 'long';
+    el.oApplied.hidden = name !== 'applied';
+    const node = { short: el.oShort, long: el.oLong, applied: el.oApplied }[name];
+    if (node) { node.classList.remove('zoom-in'); void node.offsetWidth; node.classList.add('zoom-in'); }
+    if (name === 'long') el.oLong.scrollTop = 0;
+  }
+  function closeOverlay() {
+    S.overlay = null; S.notifKind = null;
+    el.oShort.hidden = el.oLong.hidden = el.oApplied.hidden = true;
+  }
+
+  function showView(name, anim = 'push') {
+    if (name === 'settings') renderSettings();
+    if (name === 'picker') renderPicker();
+    for (const [k, v] of Object.entries(el.views)) v.hidden = k !== name;
+    const v = el.views[name];
+    v.classList.remove('push-in', 'pop-in', 'zoom-in'); void v.offsetWidth;
+    v.classList.add(anim + '-in');
+    S.view = name;
+  }
+
+  function setPage(i) {
+    i = Math.max(0, Math.min(2, i));
+    if (i === S.page) return;
+    S.page = i;
+    el.pages.style.transform = `translateY(${-i * 251}px)`;
+    el.dots.forEach((d, j) => d.classList.toggle('on', j === i));
+  }
+
+  function sendReminder() {
+    closeOverlay();
+    if (!S.log.length) S.log.push(Math.max(DAY_START, S.minutes - 100));
+    S.protection = 0; S.snoozeUntil = null;
+    notify('reapply');
+  }
+
+  function swim() {
+    closeOverlay();
+    logEvent('Swim detected · Water Lock on');
+    S.protection = S.waterResistant ? S.protection * 0.5 : 0;
+    if (S.protection <= 0) S.flags.reapply = true;
+    notify('swim');
+  }
+
+  function act(name, val) {
+    switch (name) {
+      case 'apply': return applySunscreen();
+      case 'settings': return showView('settings');
+      case 'back': return S.view === 'picker' ? showView('settings', 'pop') : showView('app', 'pop');
+      case 'pick': S.picker = val; return showView('picker');
+      case 'set-skin': S.skin = +val; return showView('settings', 'pop');
+      case 'set-spf': S.spf = +val; return showView('settings', 'pop');
+      case 'toggle': S[val] = !S[val]; haptic(); return renderSettings();
+      case 'open-app': setPage(0); return showView('app', 'zoom');
+      case 'expand': return showOverlay('long');
+      case 'notif-primary': {
+        const k = S.notifKind; closeOverlay();
+        if (k !== 'shade') applySunscreen();
+        return;
+      }
+      case 'notif-snooze': {
+        const k = S.notifKind; closeOverlay();
+        if (k in S.flags) S.flags[k] = false;
+        if (k === 'swim') S.flags.reapply = false;
+        S.snoozeUntil = S.minutes + 15;
+        logEvent('Snoozed for 15 minutes');
+        return;
+      }
+      case 'notif-dismiss': return closeOverlay();
+      case 'applied-close': return closeOverlay();
+    }
+  }
+
+  function crownPress() {
+    haptic();
+    if (S.overlay) return closeOverlay();
+    if (S.view === 'face') { setPage(0); showView('app', 'zoom'); }
+    else showView('face', 'zoom');
+  }
+
+  // ---------- Settings & pickers ----------
+  const chev = '<svg class="chev" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5 6.5 6.5 1.5 11.5"/></svg>';
+  const check = '<svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5 6.5 12.5 13.5 3.5"/></svg>';
+  const toggleRow = (key, title, sub) => `<button class="row" data-act="toggle" data-val="${key}" role="switch" aria-checked="${S[key]}"><div class="row-text"><div class="row-title">${title}</div>${sub ? `<div class="row-sub">${sub}</div>` : ''}</div><span class="tg ${S[key] ? 'on' : ''}"></span></button>`;
+  function renderSettings() {
+    const scroll = el.settingsList.scrollTop;
+    el.settingsList.innerHTML = `
+      <div class="list-h">You</div>
+      <button class="row" data-act="pick" data-val="skin"><div class="row-text"><div class="row-title">Skin Type</div><div class="row-sub">Type ${SKIN[S.skin].n}</div></div>${chev}</button>
+      <button class="row" data-act="pick" data-val="spf"><div class="row-text"><div class="row-title">Sunscreen</div><div class="row-sub">SPF ${spfLabel()}</div></div>${chev}</button>
+      ${toggleRow('waterResistant', 'Water resistant', '80 minutes')}
+      <div class="list-h">Reminders</div>
+      ${toggleRow('reminders', 'Reapply alerts')}
+      ${toggleRow('onlyUV3', 'Only at UV 3+')}
+      <div class="list-foot">Alerts every 2 h at low UV, down to every 80 min at extreme UV, and after swimming.</div>`;
+    el.settingsList.scrollTop = scroll;
+  }
+  function renderPicker() {
+    el.pickerList.scrollTop = 0;
+    if (S.picker === 'skin') {
+      el.pickerTitle.textContent = 'Skin Type';
+      el.pickerList.innerHTML = SKIN.map((s, i) => `<button class="row" data-act="set-skin" data-val="${i}"><div class="row-text"><div class="row-title">Type ${s.n}</div><div class="row-sub">${s.d}</div></div>${i === S.skin ? check : ''}</button>`).join('')
+        + '<div class="list-foot">Fitzpatrick scale. Sets how fast your daily sun dose fills.</div>';
+    } else {
+      el.pickerTitle.textContent = 'Sunscreen';
+      el.pickerList.innerHTML = SPFS.map(v => `<button class="row" data-act="set-spf" data-val="${v}"><div class="row-text"><div class="row-title">SPF ${v === 70 ? '50+' : v}</div></div>${v === S.spf ? check : ''}</button>`).join('')
+        + '<div class="list-foot">Dermatologists recommend SPF 30 or higher.</div>';
+    }
+  }
+
+  // ---------- Render (every frame; only touches what changed) ----------
+  let lastPeakKey = '';
+  function update() {
+    const uv = currentUV(), r = Math.round(uv), cat = uvCat(uv);
+    const applied = S.log.length > 0, due = applied && S.protection <= 0;
+    const rem = remaining();
+    const clock = fmtClock(S.minutes);
+    for (const t of el.times) setText(t, clock);
+
+    // Now page
+    setText(el.appTitle, ['UV ' + r + ' · ' + cat.name, 'Forecast', 'Today'][S.page]);
+    el.appTitle.style.color = S.page === 0 ? cat.color : '';
+    el.glow.style.setProperty('--glow', due && r >= 3 ? '#FF453A' : cat.color);
+    let mood = r === 0 ? 'sleepy' : (due && r >= 3) ? 'alarmed' : r < 3 ? 'sleepy' : r < 6 ? 'happy' : r < 8 ? 'cool' : 'hot';
+    const needs = r >= 3 && (!applied || due);
+    setSun(el.homeSun, mood, { bottle: needs });
+
+    const p = S.protection;
+    const ringColor = due ? '#FF453A' : p > 0.5 ? '#30D158' : p > 0.2 ? '#FFD60A' : '#FF9F0A';
+    el.ringFill.setAttribute('stroke-dasharray', `${(p * 100).toFixed(2)} 100`);
+    el.ringFill.style.stroke = ringColor;
+    el.ringFill.style.opacity = p > 0 ? 1 : 0;
+    el.ringTrack.style.stroke = applied ? ringColor : 'rgba(255,255,255,.6)';
+    el.ringWrap.classList.toggle('due', due && r >= 3);
+
+    let big, cap, color = '#fff';
+    if (r === 0) { big = 'Sun’s down'; cap = 'UV 0 · rest up'; }
+    else if (due) { big = 'Reapply now'; cap = `SPF ${spfLabel()} has worn off`; color = r >= 3 ? '#FF6961' : '#fff'; }
+    else if (applied) { big = fmtDur(rem); cap = S.outdoors ? 'until you reapply' : 'until reapply · indoors'; }
+    else if (r >= 3) { big = 'Apply SPF'; cap = `UV ${r} needs protection`; color = cat.color; }
+    else { big = 'Low UV'; cap = 'No sunscreen needed'; }
+    setText(el.statusBig, big); el.statusBig.style.color = color;
+    setText(el.statusCap, cap);
+    setText(el.homeBtnLabel, applied ? 'I Reapplied' : 'I Applied SPF');
+    const prominent = needs;
+    el.homeBtn.classList.toggle('prominent', prominent);
+    el.homeBtn.classList.toggle('glass', !prominent);
+
+    // Forecast page
+    setText(el.uvNum, String(r)); el.uvNum.style.color = cat.color;
+    setText(el.uvCat, cat.name); el.uvCat.style.color = cat.color;
+    el.uvMarker.style.left = `${Math.min(100, uv / 12 * 100)}%`;
+    const peakKey = S.weather;
+    if (peakKey !== lastPeakKey) {
+      lastPeakKey = peakKey;
+      const peak = Math.round(WEATHER[S.weather]);
+      setText(el.uvPeak, `Peak ${peak} at 1 PM`);
+      HOURS.forEach((h, i) => {
+        const v = forecast(h * 60 + 30);
+        bars[i].style.height = `${Math.max(3, v / 12 * 54)}px`;
+        bars[i].style.background = uvCat(v).color;
+      });
+      let from = null, to = null;
+      for (let m = DAY_START; m <= DAY_END; m += 5) if (forecast(m) >= 2.5) { from ??= m; to = m; }
+      setHTML(el.uvWindow, from == null ? 'UV stays low today' : `Wear SPF <b>${fmtClock(from)}–${fmtClock(to)}</b>`);
+    }
+    const hourNow = Math.floor(S.minutes / 60);
+    bars.forEach((b, i) => b.classList.toggle('now', HOURS[i] === hourNow));
+
+    // Today page
+    const dosePct = Math.round(S.dose * 100);
+    setHTML(el.doseVal, `${dosePct}% <small>of burn limit</small>`);
+    el.doseBar.style.width = `${Math.min(100, dosePct)}%`;
+    el.doseBar.style.background = dosePct >= 80 ? '#FF453A' : dosePct >= 50 ? '#FF9F0A' : '#FFD60A';
+    setText(el.doseFoot, `Skin Type ${SKIN[S.skin].n} · SPF ${spfLabel()}`);
+    setText(el.sunTime, fmtDur(S.sunMinutes));
+    setText(el.appCount, `${S.log.length}×`);
+    setText(el.lastApplied, applied ? `Last applied at ${fmtClockAP(S.log[S.log.length - 1])}` : 'Not applied yet today');
+
+    // Watch face
+    if (S.view === 'face') {
+      if (due) { setText(el.wLabel, 'SPF Watch'); setText(el.wBig, 'Reapply'); setText(el.wSub, `UV ${r} · ${cat.name}`); }
+      else if (applied && r > 0) { setText(el.wLabel, 'Reapply in'); setText(el.wBig, fmtDur(rem)); setText(el.wSub, `UV ${r} · ${cat.name}`); }
+      else { setText(el.wLabel, 'SPF Watch'); setText(el.wBig, `UV ${r}`); setText(el.wSub, r >= 3 ? 'Put on sunscreen' : cat.name); }
+      el.widget.style.background = r === 0 ? 'linear-gradient(170deg,#1B2350,#3B3F8F)' : due && r >= 3 ? 'linear-gradient(170deg,#E0532E,#F79B45)' : 'linear-gradient(170deg,#2F7DDB,#5DB2F0)';
+      setSun(el.wSun, mood, { bottle: needs });
+      setSun(el.cSun, mood);
+      setText(el.cUv, String(r));
+      el.cUvArc.setAttribute('stroke-dasharray', `${Math.min(75, uv / 12 * 75).toFixed(2)} 100`);
+      el.cUvArc.style.stroke = cat.color;
+      el.cProt.setAttribute('stroke-dasharray', `${(p * 100).toFixed(2)} 100`);
+      el.cProt.style.stroke = ringColor;
+      el.cProtTrack.style.stroke = due ? 'rgba(255,69,58,.35)' : 'rgba(48,209,88,.25)';
+      setText(el.cDayVal, String(Math.floor(S.sunMinutes)));
+      el.cDay.setAttribute('stroke-dasharray', `${Math.min(100, S.sunMinutes / 120 * 100).toFixed(2)} 100`);
+    }
+
+    // Panel
+    setHTML(el.clock, `${fmtClock(S.minutes)}<small>${ampm(S.minutes)}</small>`);
+    if (!rangeActive && +el.timeRange.value !== Math.floor(S.minutes)) el.timeRange.value = Math.floor(S.minutes);
+    if (!uvActive && +el.uvRange.value !== r) el.uvRange.value = r;
+    setText(el.chipDot, String(r)); el.chipDot.style.background = cat.color;
+    setText(el.chipText, cat.name);
+    el.followBtn.disabled = S.uvOverride == null;
+    el.followBtn.textContent = S.uvOverride == null ? 'Following forecast' : 'Follow forecast';
+    el.outdoors.checked = S.outdoors;
+    el.pausedNote.hidden = !(S.overlay && S.playing);
+    const playIcon = S.playing
+      ? '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>'
+      : '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.2v11.6a.8.8 0 0 0 1.2.7l9-5.8a.8.8 0 0 0 0-1.4l-9-5.8a.8.8 0 0 0-1.2.7z"/></svg>';
+    setHTML(el.play, playIcon);
+    el.play.setAttribute('aria-label', S.playing ? 'Pause' : 'Play');
+    for (const b of el.speedSeg.children) b.setAttribute('aria-pressed', String(+b.dataset.speed === S.speed));
+    for (const b of el.weatherSeg.children) b.setAttribute('aria-pressed', String(b.dataset.weather === S.weather));
+  }
+
+  // ---------- Loop ----------
+  let last = performance.now();
+  function frame(t) {
+    const dt = Math.min(250, t - last); last = t;
+    if (S.playing && !S.overlay) advance(dt / 1000 * S.speed / 60);
+    runChecks();
+    update();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- Input: taps, swipes, Digital Crown ----------
+  let drag = null, suppressClick = false;
+  const scrollerFor = () => S.overlay === 'long' ? el.oLong : S.view === 'settings' ? el.settingsList : S.view === 'picker' ? el.pickerList : null;
+  const scale = () => el.device.getBoundingClientRect().width / 250;
+
+  el.screen.addEventListener('pointerdown', e => {
+    drag = { x: e.clientX, y: e.clientY, top: scrollerFor()?.scrollTop ?? 0, moved: false };
+    const b = e.target.closest('.glass, .capsule, .row'); if (b) b.classList.add('pressed');
+  });
+  window.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.hypot(dx, dy) > 6) drag.moved = true;
+    const sc = scrollerFor();
+    if (sc && drag.moved) sc.scrollTop = drag.top - dy / scale();
+  });
+  window.addEventListener('pointerup', e => {
+    document.querySelectorAll('.pressed').forEach(n => n.classList.remove('pressed'));
+    if (!drag) return;
+    const dx = (e.clientX - drag.x) / scale(), dy = (e.clientY - drag.y) / scale();
+    if (drag.moved) {
+      suppressClick = true; setTimeout(() => { suppressClick = false; }, 0);
+      if (S.overlay === 'short') showOverlay('long');
+      else if (!S.overlay && S.view === 'app' && Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx)) setPage(S.page + (dy < 0 ? 1 : -1));
+      else if (!S.overlay && (S.view === 'settings' || S.view === 'picker') && dx > 50 && Math.abs(dx) > Math.abs(dy)) act('back');
+    }
+    drag = null;
+  });
+  el.screen.addEventListener('click', e => {
+    if (suppressClick) return;
+    const t = e.target.closest('[data-act]'); if (!t) return;
+    act(t.dataset.act, t.dataset.val);
+  });
+
+  let crownAcc = 0, crownLock = 0, crownShift = 0;
+  function turnCrown(delta) {
+    crownShift += delta * 0.15;
+    el.crown.style.setProperty('--crown-shift', `${crownShift}px`);
+    const sc = scrollerFor();
+    if (sc) { sc.scrollTop += delta; return; }
+    if (S.overlay || S.view !== 'app') return;
+    crownAcc += delta;
+    const t = performance.now();
+    if (Math.abs(crownAcc) > 40 && t > crownLock) {
+      setPage(S.page + Math.sign(crownAcc));
+      crownAcc = 0; crownLock = t + 420;
+    }
+  }
+  el.wrap.addEventListener('wheel', e => { e.preventDefault(); turnCrown(e.deltaY); }, { passive: false });
+  el.crown.addEventListener('click', e => { e.stopPropagation(); crownPress(); });
+  el.wrap.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); scrollerFor() ? turnCrown(40) : setPage(S.page + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); scrollerFor() ? turnCrown(-40) : setPage(S.page - 1); }
+    else if (e.key === 'Escape') { if (S.overlay) closeOverlay(); else if (S.view === 'settings' || S.view === 'picker') act('back'); }
+    else if (e.key === 'Home') crownPress();
+  });
+
+  // ---------- Panel wiring ----------
+  let rangeActive = false, uvActive = false;
+  el.play.addEventListener('click', () => {
+    if (!S.playing && S.minutes >= DAY_END) S.minutes = DAY_START + 180;
+    S.playing = !S.playing;
+  });
+  el.timeRange.addEventListener('pointerdown', () => { rangeActive = true; });
+  window.addEventListener('pointerup', () => { rangeActive = false; uvActive = false; });
+  el.timeRange.addEventListener('input', () => { S.minutes = +el.timeRange.value; });
+  el.speedSeg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) S.speed = +b.dataset.speed; });
+  el.weatherSeg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { S.weather = b.dataset.weather; S.uvOverride = null; } });
+  el.uvRange.addEventListener('pointerdown', () => { uvActive = true; });
+  el.uvRange.addEventListener('input', () => { S.uvOverride = +el.uvRange.value; });
+  el.followBtn.addEventListener('click', () => { S.uvOverride = null; });
+  el.outdoors.addEventListener('change', () => { S.outdoors = el.outdoors.checked; logEvent(S.outdoors ? 'Stepped outside' : 'Went indoors'); });
+  $('aSwim').addEventListener('click', swim);
+  $('aRemind').addEventListener('click', sendReminder);
+  $('aFace').addEventListener('click', crownPress);
+  $('aReset').addEventListener('click', () => {
+    const keep = { skin: S.skin, spf: S.spf, waterResistant: S.waterResistant, reminders: S.reminders, onlyUV3: S.onlyUV3, speed: S.speed, weather: S.weather };
+    S = Object.assign(fresh(), keep, {
+      minutes: 8 * 60 + 30, protection: 0, log: [], sunMinutes: 0, dose: 0,
+      flags: { start: false, reapply: false, shade: false },
+    });
+    closeOverlay(); showView('app', 'zoom');
+    S.page = -1; setPage(0);
+    logEvent('New day started at 8:30 AM');
+  });
+
+  // ---------- Fit the watch to the window ----------
+  function fit() {
+    const narrow = window.innerWidth <= 1080;
+    const s = narrow
+      ? Math.min(1.6, (document.documentElement.clientWidth - 40) / 262)
+      : Math.min(1.85, Math.max(1.1, (window.innerHeight - 64) / 400));
+    el.device.style.transform = `scale(${s})`;
+    el.wrap.style.width = `${250 * s}px`;
+    el.wrap.style.height = `${400 * s}px`;
+  }
+  window.addEventListener('resize', fit);
+
+  fit();
+  S.page = -1; setPage(0);
+  renderLog();
+  logEvent('Sunscreen logged at 9:52 AM');
+  S.events[0].t = 9 * 60 + 52; renderLog();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
