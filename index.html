@@ -270,14 +270,27 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* Watch face / Smart Stack */
 .face-date { position: absolute; left: 19px; top: 10px; font: 600 15px/1 var(--sf); letter-spacing: .2px; }
-.widget { position: absolute; left: 10px; right: 10px; top: 36px; height: 86px; padding: 9px 12px; border: 0; border-radius: 22px; text-align: left; color: #fff; overflow: hidden; background: linear-gradient(170deg, #2F7DDB, #5DB2F0); transition: background .8s; }
-.widget:active { transform: scale(.97); }
+.stack { position: absolute; left: 10px; right: 10px; top: 36px; height: 86px; }
+.widget { position: absolute; inset: 0; padding: 9px 12px; border: 0; border-radius: 22px; text-align: left; color: #fff; overflow: hidden; background: linear-gradient(170deg, #2F7DDB, #5DB2F0);
+  transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .45s, filter .45s, background .8s; }
+.widget[data-pos="0"] { z-index: 3; }
+.widget[data-pos="1"] { z-index: 2; transform: translateY(12px) scale(.9); opacity: .6; filter: brightness(.7); }
+.widget[data-pos="2"] { z-index: 1; transform: translateY(20px) scale(.8); opacity: 0; pointer-events: none; }
+.widget[data-pos="0"]:active { transform: scale(.97); }
+.widget.promoted { animation: promote .9s cubic-bezier(.22,1,.36,1); }
+@keyframes promote { 0% { transform: translateY(12px) scale(.9); } 55% { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 0 2px rgba(255,255,255,.7); } 100% { transform: none; } }
+.w-spf { background: linear-gradient(170deg, #E8742A, #F5A742); }
+.w-cal { background: #2A2A2D; }
+.w-cal .widget-label { color: #FF453A; }
+.w-cal .widget-big { font: 600 17px/1.2 var(--sf); margin: 4px 0 2px; letter-spacing: 0; }
+.w-weather .widget-sub { opacity: .85; }
+.w-wicon { position: absolute; right: 12px; top: 10px; width: 30px; height: 30px; }
 .widget-label { font: 600 13px/1.2 var(--sf); }
 .widget-big { font: 800 28px/1.05 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -.3px; }
 .widget-sub { font: 600 13px/1.2 var(--sf); opacity: .92; }
 .widget-sun { position: absolute; right: 4px; top: 6px; width: 64px; height: 64px; }
 .widget-sun svg { width: 100%; height: 100%; overflow: visible; }
-.comps { position: absolute; left: 10px; right: 10px; top: 128px; height: 66px; border-radius: 22px; background: var(--w-row); display: flex; align-items: center; justify-content: space-around; padding: 0 6px; }
+.comps { position: absolute; left: 10px; right: 10px; top: 138px; height: 66px; border-radius: 22px; background: var(--w-row); display: flex; align-items: center; justify-content: space-around; padding: 0 6px; }
 .comp { position: relative; width: 50px; height: 50px; border-radius: 50%; background: #000; display: grid; place-items: center; }
 .comp > svg.ring { position: absolute; inset: 3px; width: 44px; height: 44px; transform: rotate(-90deg); }
 .comp-in { position: relative; text-align: center; line-height: 1; }
@@ -285,11 +298,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .comp-in span { display: block; font: 700 7.5px/1 var(--sf); letter-spacing: .4px; color: rgba(255,255,255,.65); margin-bottom: 2px; }
 .comp-sun { width: 26px; height: 26px; }
 .comp-sun svg { width: 100%; height: 100%; overflow: visible; }
-.all-apps { position: absolute; left: 50%; top: 202px; width: 112px; height: 32px; margin-left: -56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 5px; font: 500 13px/1 var(--sf); padding: 0; }
+.all-apps { position: absolute; left: 50%; top: 208px; width: 112px; height: 30px; margin-left: -56px; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; font: 500 13px/1 var(--sf); padding: 0; }
 .all-apps svg { width: 13px; height: 13px; }
 
 /* Notifications & sheets */
-.overlay { position: absolute; inset: 0; z-index: 20; background: #000; }
+.overlay { position: absolute; inset: 0; z-index: 20; background: #000; border-radius: 42px; clip-path: inset(0 round 42px); }
 .blobs { position: absolute; inset: -30px; pointer-events: none; filter: blur(18px); opacity: .55;
   background:
     radial-gradient(90px 80px at 25% 30%, var(--blob-a, #FF9F0A), transparent 70%),
@@ -339,6 +352,45 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @keyframes twinkle { 50% { transform: scale(.5); opacity: .5; } }
 @keyframes drip { 0% { transform: translateY(-2px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(5px); opacity: 0; } }
 
+/* Corners face */
+.corner-arcs { position: absolute; inset: 0; width: 205px; height: 251px; pointer-events: none; }
+.corner-arcs path { fill: none; stroke-width: 5; stroke-linecap: round; }
+.corner-arcs .trk { stroke: rgba(255,255,255,.16); }
+.cn { position: absolute; width: 40px; text-align: center; line-height: 1; }
+.cn b { display: block; font: 800 15px/1 var(--sfr); font-variant-numeric: tabular-nums; }
+.cn span { display: block; font: 700 8px/1.2 var(--sf); letter-spacing: .5px; color: rgba(255,255,255,.6); }
+.cn.tl { left: 15px; top: 22px; } .cn.tr { right: 15px; top: 18px; }
+.cn.bl { left: 15px; bottom: 22px; } .cn.br { right: 15px; bottom: 22px; }
+.cn.tr .comp-sun { width: 28px; height: 28px; margin: 0 auto; }
+.k-date { position: absolute; left: 0; right: 0; top: 64px; text-align: center; font: 600 13px/1 var(--sf); color: var(--w-orange); letter-spacing: .3px; }
+.k-time { position: absolute; left: 0; right: 0; top: 80px; text-align: center; font: 700 54px/1 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -1.5px; }
+.k-inline { position: absolute; left: 8px; right: 8px; top: 142px; display: flex; justify-content: center; align-items: center; gap: 4px; font: 600 12.5px/1 var(--sf); color: var(--w-tint); white-space: nowrap; }
+.k-inline svg { width: 12px; height: 12px; flex: none; }
+.k-sun { position: absolute; left: 50%; top: 166px; width: 48px; height: 48px; margin-left: -24px; cursor: pointer; }
+.k-sun svg { width: 100%; height: 100%; overflow: visible; }
+
+/* Onboarding */
+.ob-welcome { position: absolute; inset: 0; text-align: center; }
+.ob-sun { position: absolute; left: 50%; top: 18px; width: 84px; height: 84px; margin-left: -42px; cursor: pointer; }
+.ob-sun svg { width: 100%; height: 100%; overflow: visible; }
+.ob-welcome h3 { position: absolute; left: 10px; right: 10px; top: 106px; margin: 0; font: 800 19px/1.1 var(--sfr); }
+.ob-welcome p { position: absolute; left: 16px; right: 16px; top: 131px; margin: 0; font: 400 13px/1.3 var(--sf); color: rgba(255,255,255,.72); }
+.ob-go { position: absolute; left: 14px; right: 14px; bottom: 10px; width: auto; }
+.capsule.tint { background: var(--w-tint); color: #000; box-shadow: inset 0 1px .5px rgba(255,255,255,.6), 0 4px 14px rgba(255,201,51,.3); }
+.capsule.tint:active { background: #FFD966; }
+.list-intro { padding: 0 8px 2px; font: 400 13px/1.3 var(--sf); color: rgba(255,255,255,.7); flex: none; }
+
+/* Coverage picker */
+.fig { width: 22px; height: 30px; flex: none; }
+
+/* Sunny reacting to a tap */
+.ring-sun { cursor: pointer; }
+.bubble { position: absolute; left: 50%; top: 42px; z-index: 4; padding: 4px 9px; border-radius: 12px; font: 600 11.5px/1.2 var(--sf); white-space: nowrap; transform: translate(-50%, 6px) scale(.8); opacity: 0; pointer-events: none; transition: opacity .2s, transform .35s cubic-bezier(.3,1.5,.5,1); }
+.bubble.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.sun .hand { transform-box: view-box; transform-origin: 26px 8px; animation: wave .5s ease-in-out infinite alternate; }
+@keyframes wave { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
+.card-line { font: 600 14px/1.25 var(--sf); }
+
 /* ---------- Simulator panel ---------- */
 .panel { max-width: 340px; justify-self: start; display: grid; gap: 14px; width: 100%; }
 .group { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; }
@@ -366,6 +418,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .switch:checked { background: #2FBF55; }
 .switch:checked::after { left: 21px; }
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.panel .seg + .actions { margin-top: 2px; }
 .act { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font: 600 13px/1.2 var(--sf); text-align: left; }
 .act:hover { border-color: var(--accent); }
 .act svg { width: 16px; height: 16px; color: var(--accent); flex: none; }
@@ -422,8 +475,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
                 <div class="glow" id="glow"></div>
                 <div class="ring-wrap" id="ringWrap">
                   <svg viewBox="0 0 110 110"><circle class="ring-track" id="ringTrack" cx="55" cy="55" r="51"/><circle class="ring-fill" id="ringFill" cx="55" cy="55" r="51" pathLength="100" stroke-dasharray="0 100"/></svg>
-                  <div class="ring-sun" id="homeSun"></div>
+                  <div class="ring-sun" id="homeSun" data-act="poke" role="button" aria-label="Tap Sunny"></div>
                 </div>
+                <div class="glass bubble" id="bubble" aria-live="polite"></div>
                 <div class="status">
                   <div class="status-big" id="statusBig">–</div>
                   <div class="status-cap" id="statusCap"></div>
@@ -459,8 +513,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
                   <div class="card"><div class="card-label">In the sun</div><div class="card-value" id="sunTime">0m</div></div>
                   <div class="card"><div class="card-label">Applied</div><div class="card-value" id="appCount">0×</div></div>
                 </div>
-                <div class="card" style="top: 200px; padding-block: 7px">
-                  <div class="card-label" id="lastApplied">Not applied yet today</div>
+                <div class="card" style="top: 196px; padding-block: 7px">
+                  <div class="card-label">Last applied</div>
+                  <div class="card-line" id="lastApplied">Not yet today</div>
                 </div>
               </section>
             </div>
@@ -494,31 +549,75 @@ button { font: inherit; color: inherit; cursor: pointer; }
             </div>
           </div>
 
-          <!-- Watch face with Smart Stack -->
+          <!-- Watch faces -->
           <div class="view" id="v-face" hidden>
-            <div class="face-date" id="faceDate">WED 22</div>
-            <div class="tb-time js-time">11:05</div>
-            <button class="widget" id="widget" data-act="open-app" aria-label="Open SPF Watch">
-              <div class="widget-label" id="wLabel">Reapply in</div>
-              <div class="widget-big" id="wBig">42m</div>
-              <div class="widget-sub" id="wSub">UV 7 · High</div>
-              <div class="widget-sun" id="wSun"></div>
-            </button>
-            <div class="comps">
-              <div class="comp" title="UV index">
-                <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" pathLength="100" stroke-dasharray="75 100" transform="rotate(45 22 22)"/><circle id="cUvArc" cx="22" cy="22" r="19" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(45 22 22)"/></svg>
-                <div class="comp-in"><span>UV</span><b id="cUv">7</b></div>
+            <div id="faceStack">
+              <div class="face-date" id="faceDate">WED 22</div>
+              <div class="tb-time js-time">11:05</div>
+              <div class="stack" id="stack">
+                <button class="widget w-weather" data-act="widget" data-val="weather" data-pos="0" aria-label="Weather">
+                  <div class="widget-label" id="wtLabel">Sunny</div>
+                  <div class="widget-big" id="wtTemp">26°</div>
+                  <div class="widget-sub" id="wtSub">H:29° L:21°</div>
+                  <svg class="w-wicon" viewBox="0 0 30 30"><circle cx="15" cy="15" r="7" fill="#FFD60A"/><g stroke="#FFD60A" stroke-width="2.4" stroke-linecap="round"><path d="M15 2v3M15 25v3M2 15h3M25 15h3M5.8 5.8l2.1 2.1M22.1 22.1l2.1 2.1M5.8 24.2l2.1-2.1M22.1 7.9l2.1-2.1"/></g></svg>
+                </button>
+                <button class="widget w-spf" id="widget" data-act="widget" data-val="spf" data-pos="1" aria-label="Open SPF Watch">
+                  <div class="widget-label" id="wLabel">Reapply in</div>
+                  <div class="widget-big" id="wBig">42m</div>
+                  <div class="widget-sub" id="wSub">UV 7 · High</div>
+                  <div class="widget-sun" id="wSun"></div>
+                </button>
+                <button class="widget w-cal" data-act="widget" data-val="cal" data-pos="2" aria-label="Calendar">
+                  <div class="widget-label">Up next</div>
+                  <div class="widget-big">Swim with Sam</div>
+                  <div class="widget-sub">2:00 PM · Beach Club</div>
+                </button>
               </div>
-              <div class="comp" title="Sunscreen protection">
-                <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(48,209,88,.25)" stroke-width="4" id="cProtTrack"/><circle id="cProt" cx="22" cy="22" r="19" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/></svg>
-                <div class="comp-sun" id="cSun"></div>
+              <div class="comps">
+                <div class="comp" title="UV index">
+                  <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" pathLength="100" stroke-dasharray="75 100" transform="rotate(45 22 22)"/><circle id="cUvArc" cx="22" cy="22" r="19" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(45 22 22)"/></svg>
+                  <div class="comp-in"><span>UV</span><b id="cUv">7</b></div>
+                </div>
+                <div class="comp" title="Sunscreen protection">
+                  <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(48,209,88,.25)" stroke-width="4" id="cProtTrack"/><circle id="cProt" cx="22" cy="22" r="19" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/></svg>
+                  <div class="comp-sun" id="cSun"></div>
+                </div>
+                <div class="comp" title="Time in sun">
+                  <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,214,10,.22)" stroke-width="4"/><circle id="cDay" cx="22" cy="22" r="19" fill="none" stroke="#FFD60A" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/></svg>
+                  <div class="comp-in"><span>MIN</span><b id="cDayVal">0</b></div>
+                </div>
               </div>
-              <div class="comp" title="Time in sun">
-                <svg class="ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,214,10,.22)" stroke-width="4"/><circle id="cDay" cx="22" cy="22" r="19" fill="none" stroke="#FFD60A" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/></svg>
-                <div class="comp-in"><span>MIN</span><b id="cDayVal">0</b></div>
-              </div>
+              <button class="glass all-apps" data-act="open-app"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="2" cy="3" r="1.3"/><circle cx="2" cy="7" r="1.3"/><circle cx="2" cy="11" r="1.3"/><rect x="5" y="2.2" width="8" height="1.6" rx=".8"/><rect x="5" y="6.2" width="8" height="1.6" rx=".8"/><rect x="5" y="10.2" width="8" height="1.6" rx=".8"/></svg>All Apps</button>
             </div>
-            <button class="glass all-apps" data-act="open-app"><svg viewBox="0 0 14 14" fill="currentColor"><circle cx="2" cy="3" r="1.3"/><circle cx="2" cy="7" r="1.3"/><circle cx="2" cy="11" r="1.3"/><rect x="5" y="2.2" width="8" height="1.6" rx=".8"/><rect x="5" y="6.2" width="8" height="1.6" rx=".8"/><rect x="5" y="10.2" width="8" height="1.6" rx=".8"/></svg>All Apps</button>
+
+            <div id="faceCorners" hidden>
+              <svg class="corner-arcs" viewBox="0 0 205 251" id="cornerArcs"></svg>
+              <div class="cn tl" title="UV index"><span>UV</span><b id="kUv">7</b></div>
+              <div class="cn tr" title="Sunscreen protection"><div class="comp-sun" id="kProtSun"></div></div>
+              <div class="cn bl" title="Sun dose"><b id="kDose">0%</b><span>DOSE</span></div>
+              <div class="cn br" title="Time in sun"><b id="kDay">0</b><span>MIN</span></div>
+              <div class="k-date" id="kDate">WED 22</div>
+              <div class="k-time js-time">11:05</div>
+              <div class="k-inline"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.6" fill="currentColor"/><g stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 .8v1.4M6 9.8v1.4M.8 6h1.4M9.8 6h1.4M2.3 2.3l1 1M8.7 8.7l1 1M2.3 9.7l1-1M8.7 3.3l1-1"/></g></svg><span id="kInline">UV 7 · Reapply in 41m</span></div>
+              <div class="k-sun" id="kSun" data-act="poke" role="button" aria-label="Tap Sunny"></div>
+            </div>
+          </div>
+
+          <!-- First-run setup -->
+          <div class="view" id="v-onboard" hidden>
+            <div class="ob-welcome" id="obWelcome">
+              <div class="blobs" style="--blob-a:#FFD60A; --blob-b:#64D2FF; --blob-c:#FF9F0A"></div>
+              <div class="ob-sun" id="obSun" data-act="poke" role="button" aria-label="Tap Sunny"></div>
+              <h3>Hi, I'm Sunny</h3>
+              <p>I'll watch the UV index and tell you when to reapply sunscreen.</p>
+              <button class="capsule tint ob-go" data-act="ob-start">Get Started</button>
+            </div>
+            <div class="list" id="obList" hidden></div>
+            <div class="topbar fade" id="obTop" hidden>
+              <button class="glass circle-btn" data-act="back" aria-label="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
+              <div class="tb-time js-time">11:05</div>
+              <div class="tb-title" id="obTitle">Skin Type</div>
+            </div>
           </div>
 
           <!-- Short Look -->
@@ -546,11 +645,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
             </div>
           </div>
 
+          <!-- Where did you apply? -->
+          <div class="overlay" id="o-cover" hidden>
+            <div class="list" id="coverList"></div>
+            <div class="topbar fade">
+              <button class="glass circle-btn" data-act="cover-cancel" aria-label="Cancel"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></svg></button>
+              <div class="tb-time js-time">11:05</div>
+              <div class="tb-title">Applied to</div>
+            </div>
+          </div>
+
           <!-- Applied confirmation -->
           <div class="overlay sheet" id="o-applied" data-act="applied-close" hidden>
             <div class="blobs" style="--blob-a:#30D158; --blob-b:#FFD60A; --blob-c:#64D2FF"></div>
             <div class="sheet-sun" id="appliedSun"></div>
-            <h3>Protected!</h3>
+            <h3 id="appliedTitle">Protected!</h3>
             <p id="appliedBody">Next reminder in 1h 40m</p>
           </div>
         </div>
@@ -588,10 +697,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
     <section class="group">
       <h2>Simulate</h2>
+      <div class="seg" role="group" aria-label="Watch face" id="faceSeg">
+        <button data-face="stack">Smart Stack<small>widgets</small></button>
+        <button data-face="corners">Corners<small>complications</small></button>
+      </div>
       <div class="actions">
         <button class="act" id="aSwim"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5S3.5 6.6 3.5 9.8a4.5 4.5 0 0 0 9 0C12.5 6.6 8 1.5 8 1.5z"/></svg>Go for a swim</button>
         <button class="act" id="aRemind"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5v2.8L2 11h12l-1.5-2.2V6A4.5 4.5 0 0 0 8 1.5zM6.3 12.5a1.8 1.8 0 0 0 3.4 0z"/></svg>Send reminder</button>
         <button class="act" id="aFace"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="2" width="9" height="12" rx="3"/><path d="M8 5.5V8l1.6 1" stroke-linecap="round"/></svg>Press crown</button>
+        <button class="act" id="aAlmost"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="9" r="5.5"/><path d="M8 6v3h2.2M6 1.5h4"/></svg>Due in 14 min</button>
+        <button class="act" id="aSetup"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3.4"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M3 13l1.1-1.1M11.9 4.1 13 3"/></g></svg>Replay setup</button>
         <button class="act" id="aReset"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8a5 5 0 1 0 1.6-3.7"/><path d="M3 2.5v3h3"/></svg>Start new day</button>
       </div>
     </section>
@@ -625,6 +740,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
     { n: 'VI',  d: 'Almost never burns',         base: 900 },
   ];
   const SPFS = [15, 30, 50, 70];
+  // Where sunscreen went; `frac` = share of exposed skin it protects.
+  const COVER = [
+    { name: 'Face only',   short: 'face',             d: 'Face, ears and neck', frac: 0.25, parts: ['head'] },
+    { name: 'Face & arms', short: 'face and arms',    d: 'Plus arms and hands', frac: 0.6,  parts: ['head', 'arms'] },
+    { name: 'Full body',   short: 'all exposed skin', d: 'Everything the sun can reach', frac: 1, parts: ['head', 'arms', 'body', 'legs'] },
+  ];
   const WEATHER = { overcast: 4.2, sunny: 8.4, beach: 11.8 };
   const DAY_START = 300, DAY_END = 1260;
 
@@ -634,7 +755,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
     protection: 0.42, log: [9 * 60 + 52],
     skin: 1, spf: 50, waterResistant: true, reminders: true, onlyUV3: true,
     sunMinutes: 68, dose: 0.17,
-    page: 0, view: 'app', picker: null,
+    page: 0, view: 'onboard', picker: null, onboardStep: 0, coverage: 1,
+    face: 'stack', stackOffset: 0, spfTop: false, poke: null,
     overlay: null, notifKind: null,
     flags: { start: true, reapply: false, shade: false },
     snoozeUntil: null, events: [],
@@ -670,6 +792,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
       hot:     ['#FFE68C', '#FFA22B', '#FF6E1A', '#FFAE3A'],
       alarmed: ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
       proud:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+      wave:    ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+      squint:  ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
     }[mood];
     let rays = '';
     for (let i = 0; i < 12; i++) {
@@ -698,6 +822,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
         break;
       case 'alarmed':
         face = `<circle cx="-10" cy="-3" r="5.8" fill="#fff"/><circle cx="10" cy="-3" r="5.8" fill="#fff"/><circle cx="-9.4" cy="-2" r="2.7" fill="${INK}"/><circle cx="9.4" cy="-2" r="2.7" fill="${INK}"/><path d="M-15.5 -11 L-6 -14.5 M15.5 -11 L6 -14.5" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="0" cy="11" rx="3.8" ry="4.6" fill="${INK}"/>` + cheeks + drop(-25, -13);
+        break;
+      case 'wave':
+        face = `<path d="M-14 -2 L-10 -6.5 L-6 -2 M6 -2 L10 -6.5 L14 -2" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` + grin + cheeks;
+        extra = `<g class="hand"><path d="M24 6 Q30 0 32 -8" fill="none" stroke="${P[2]}" stroke-width="5" stroke-linecap="round"/><circle cx="32.5" cy="-10" r="5.5" fill="${P[1]}" stroke="${P[2]}" stroke-width="1"/><path d="M39 -19 q3 2 3 6 M42 -23 q4 3 4 9" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></g>`;
+        break;
+      case 'squint':
+        face = `<path d="M-15 -7 L-7 -3 L-15 1 M15 -7 L7 -3 L15 1" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M-8 9.5 q2.7 -2.6 5.3 0 t5.3 0 t5.3 0" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>` + cheeks + drop(25, -13);
         break;
       case 'proud':
         face = `<path d="M-14 -2 L-10 -6.5 L-6 -2 M6 -2 L10 -6.5 L14 -2" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` + grin + cheeks;
@@ -729,14 +860,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
     statusBig: $('statusBig'), statusCap: $('statusCap'), homeBtn: $('homeBtn'), homeBtnLabel: $('homeBtnLabel'),
     uvNum: $('uvNum'), uvCat: $('uvCat'), uvPeak: $('uvPeak'), uvMarker: $('uvMarker'), chart: $('chart'), chartX: $('chartX'), uvWindow: $('uvWindow'),
     doseVal: $('doseVal'), doseBar: $('doseBar'), doseFoot: $('doseFoot'), sunTime: $('sunTime'), appCount: $('appCount'), lastApplied: $('lastApplied'),
-    views: { app: $('v-app'), settings: $('v-settings'), picker: $('v-picker'), face: $('v-face') },
+    views: { app: $('v-app'), settings: $('v-settings'), picker: $('v-picker'), face: $('v-face'), onboard: $('v-onboard') },
     settingsList: $('settingsList'), pickerList: $('pickerList'), pickerTitle: $('pickerTitle'),
     faceDate: $('faceDate'), widget: $('widget'), wLabel: $('wLabel'), wBig: $('wBig'), wSub: $('wSub'), wSun: $('wSun'),
     cUv: $('cUv'), cUvArc: $('cUvArc'), cProt: $('cProt'), cProtTrack: $('cProtTrack'), cSun: $('cSun'), cDay: $('cDay'), cDayVal: $('cDayVal'),
     oShort: $('o-short'), oLong: $('o-long'), oApplied: $('o-applied'),
     shortIcon: $('shortIcon'), shortTitle: $('shortTitle'), shortBody: $('shortBody'),
     longIcon: $('longIcon'), longTitle: $('longTitle'), longBody: $('longBody'), longPrimary: $('longPrimary'), longSnooze: $('longSnooze'),
-    appliedSun: $('appliedSun'), appliedBody: $('appliedBody'),
+    appliedSun: $('appliedSun'), appliedBody: $('appliedBody'), appliedTitle: $('appliedTitle'),
+    oCover: $('o-cover'), coverList: $('coverList'), bubble: $('bubble'),
+    obWelcome: $('obWelcome'), obList: $('obList'), obTop: $('obTop'), obTitle: $('obTitle'), obSun: $('obSun'),
+    faceStack: $('faceStack'), faceCorners: $('faceCorners'), widgets: [...document.querySelectorAll('#stack .widget')],
+    wtLabel: $('wtLabel'), wtTemp: $('wtTemp'), wtSub: $('wtSub'), weatherWidget: document.querySelector('.w-weather'),
+    cornerArcs: $('cornerArcs'), kUv: $('kUv'), kProtSun: $('kProtSun'), kDose: $('kDose'), kDay: $('kDay'), kDate: $('kDate'), kInline: $('kInline'), kSun: $('kSun'),
+    faceSeg: $('faceSeg'),
     clock: $('clock'), play: $('play'), timeRange: $('timeRange'), speedSeg: $('speedSeg'), weatherSeg: $('weatherSeg'),
     uvRange: $('uvRange'), followBtn: $('followBtn'), outdoors: $('outdoors'), chipDot: $('chipDot'), chipText: $('chipText'),
     log: $('log'), pausedNote: $('pausedNote'), times: document.getElementsByClassName('js-time'),
@@ -750,7 +887,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
   el.chartX.innerHTML = HOURS.map(h => `<span>${[9, 12, 15, 18].includes(h) ? fmtHour(h) + (h === 12 ? 'P' : '') : ''}</span>`).join('');
   const bars = [...el.chart.children];
   const now = new Date();
-  el.faceDate.textContent = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase() + ' ' + now.getDate();
+  el.faceDate.textContent = el.kDate.textContent = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase() + ' ' + now.getDate();
+
+  // Corner complications: gauges that follow the screen's rounded corners (radius 42, inset 7)
+  const arcPath = (cx, cy, a0, a1, r = 35) => {
+    const pt = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)].map(v => v.toFixed(2)).join(' ');
+    return `M${pt(a0)} A${r} ${r} 0 0 ${a1 > a0 ? 1 : 0} ${pt(a1)}`;
+  };
+  const CORNERS = { tl: [42, 42, 188, 262], tr: [163, 42, 278, 352], bl: [42, 209, 172, 98], br: [163, 209, 98, 8] };
+  el.cornerArcs.innerHTML = Object.entries(CORNERS).map(([k, c]) =>
+    `<path class="trk" d="${arcPath(...c)}"/><path id="arc-${k}" d="${arcPath(...c)}" pathLength="100" stroke-dasharray="0 100"/>`).join('');
+  const arcs = Object.fromEntries(Object.keys(CORNERS).map(k => [k, $('arc-' + k)]));
 
   // Mood legend in the intro
   const MOODS = [
@@ -776,13 +923,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
     if (S.protection > 0) S.protection = Math.max(0, S.protection - dm / intervalFor(uv));
     if (S.outdoors && uv > 0.05) {
       S.sunMinutes += dm;
-      const shield = S.protection > 0 ? Math.min(1, 3 / S.spf) : 1; // real-world SPF ≈ a third of the label
+      const spfShield = Math.min(1, 3 / S.spf); // real-world SPF ≈ a third of the label
+      const cov = COVER[S.coverage].frac;
+      const shield = S.protection > 0 ? cov * spfShield + (1 - cov) : 1;
       S.dose += dm * (uv / SKIN[S.skin].base) * shield;
     }
   }
 
   function runChecks() {
-    if (S.overlay) return;
+    if (S.overlay || S.view === 'onboard') return;
     const uv = currentUV();
     if (S.outdoors && S.dose >= 0.8 && !S.flags.shade) return notify('shade');
     if (!S.reminders || !S.outdoors) return;
@@ -808,13 +957,28 @@ button { font: inherit; color: inherit; cursor: pointer; }
       : '<li class="log-empty">Haptics and reminders show up here.</li>';
   }
 
-  function applySunscreen() {
+  const figure = parts => {
+    const c = k => parts.includes(k) ? '#FFD60A' : 'rgba(255,255,255,.22)';
+    return `<svg class="fig" viewBox="0 0 22 30" aria-hidden="true"><circle cx="11" cy="4.6" r="3.9" fill="${c('head')}"/><rect x="7" y="9.6" width="8" height="9.5" rx="2.4" fill="${c('body')}"/><rect x="2.6" y="9.8" width="3.4" height="9" rx="1.7" fill="${c('arms')}"/><rect x="16" y="9.8" width="3.4" height="9" rx="1.7" fill="${c('arms')}"/><rect x="7.3" y="19.8" width="3.2" height="9" rx="1.6" fill="${c('legs')}"/><rect x="11.5" y="19.8" width="3.2" height="9" rx="1.6" fill="${c('legs')}"/></svg>`;
+  };
+  function openCover() {
+    el.coverList.innerHTML = COVER.map((c, i) => `<button class="row" data-act="cover" data-val="${i}">${figure(c.parts)}<div class="row-text"><div class="row-title">${c.name}</div><div class="row-sub">${c.d}</div></div>${i === S.coverage ? check : ''}</button>`).join('')
+      + '<div class="list-foot">Reminders cover the skin you protected.</div>';
+    showOverlay('cover');
+    el.coverList.scrollTop = 0;
+  }
+
+  function applySunscreen(cov = S.coverage) {
+    S.coverage = cov;
     S.protection = 1;
     S.log.push(S.minutes);
     S.flags.reapply = false; S.flags.start = true; S.snoozeUntil = null;
-    haptic('Success tap · sunscreen logged');
+    haptic(`Success tap · sunscreen on ${COVER[cov].short}`);
     setSun(el.appliedSun, 'proud', { bottle: true });
-    el.appliedBody.textContent = `SPF ${spfLabel()} · next reminder in ${fmtDur(remaining())}`;
+    el.appliedTitle.textContent = 'Protected!';
+    const r = Math.round(currentUV());
+    el.appliedBody.innerHTML = `${COVER[cov].name} · SPF ${spfLabel()}<br>Next reminder in ${fmtDur(remaining())}`
+      + (cov < 2 && r >= 6 ? `<br>Cover the rest with clothes or shade` : '');
     showOverlay('applied');
     clearTimeout(applySunscreen.t);
     applySunscreen.t = setTimeout(() => { if (S.overlay === 'applied') closeOverlay(); }, 2200);
@@ -828,7 +992,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       case 'start': return { mood: 'happy', bottle: true, title: 'UV is rising', short: `UV ${uv} · ${cat}. Time for sunscreen.`, body: `UV is ${uv} (${cat}). Put on sunscreen before you head out.`, primary: 'I Applied SPF', snooze: true };
       case 'swim': return { mood: 'alarmed', bottle: true, title: 'Reapply after swimming', short: 'Water and towels wipe sunscreen off.', body: `Back from your swim? Water and towels wipe sunscreen off. UV is ${uv} (${cat}).`, primary: 'I Reapplied', snooze: true };
       case 'shade': return { mood: 'hot', bottle: false, title: 'Time for some shade', short: `${Math.round(S.dose * 100)}% of today's safe sun.`, body: `You've had ${Math.round(S.dose * 100)}% of today's safe sun for Skin Type ${SKIN[S.skin].n}. Find shade or cover up.`, primary: 'OK', snooze: false };
-      default: return { mood: 'alarmed', bottle: true, title: 'Time to reapply', short: `UV ${uv} · ${cat}. Your SPF has worn off.`, body: `UV is ${uv} (${cat}). Your SPF ${spfLabel()} wore off ${fmtDur(since)} after you put it on.`, primary: 'I Reapplied', snooze: true };
+      default: return { mood: 'alarmed', bottle: true, title: 'Time to reapply', short: `UV ${uv} · ${cat}. Your SPF has worn off.`, body: `UV is ${uv} (${cat}). The SPF ${spfLabel()} on your ${COVER[S.coverage].short} wore off ${fmtDur(since)} after you put it on.`, primary: 'I Reapplied', snooze: true };
     }
   }
 
@@ -851,21 +1015,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   function showOverlay(name) {
     S.overlay = name;
-    el.oShort.hidden = name !== 'short';
-    el.oLong.hidden = name !== 'long';
-    el.oApplied.hidden = name !== 'applied';
-    const node = { short: el.oShort, long: el.oLong, applied: el.oApplied }[name];
+    const nodes = { short: el.oShort, long: el.oLong, applied: el.oApplied, cover: el.oCover };
+    for (const [k, n] of Object.entries(nodes)) n.hidden = k !== name;
+    const node = nodes[name];
     if (node) { node.classList.remove('zoom-in'); void node.offsetWidth; node.classList.add('zoom-in'); }
     if (name === 'long') el.oLong.scrollTop = 0;
   }
   function closeOverlay() {
     S.overlay = null; S.notifKind = null;
-    el.oShort.hidden = el.oLong.hidden = el.oApplied.hidden = true;
+    el.oShort.hidden = el.oLong.hidden = el.oApplied.hidden = el.oCover.hidden = true;
   }
 
   function showView(name, anim = 'push') {
     if (name === 'settings') renderSettings();
     if (name === 'picker') renderPicker();
+    if (name === 'onboard') renderOnboard();
+    if (name === 'face') { el.faceStack.hidden = S.face !== 'stack'; el.faceCorners.hidden = S.face !== 'corners'; }
     for (const [k, v] of Object.entries(el.views)) v.hidden = k !== name;
     const v = el.views[name];
     v.classList.remove('push-in', 'pop-in', 'zoom-in'); void v.offsetWidth;
@@ -883,7 +1048,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   function sendReminder() {
     closeOverlay();
-    if (!S.log.length) S.log.push(Math.max(DAY_START, S.minutes - 100));
+    const wornAfter = intervalFor(currentUV());
+    if (!S.log.length) S.log.push(Math.max(DAY_START, S.minutes - wornAfter));
+    else S.log[S.log.length - 1] = Math.min(S.log[S.log.length - 1], S.minutes - wornAfter);
     S.protection = 0; S.snoozeUntil = null;
     notify('reapply');
   }
@@ -896,11 +1063,67 @@ button { font: inherit; color: inherit; cursor: pointer; }
     notify('swim');
   }
 
+  function poke() {
+    const uv = currentUV(), r = Math.round(uv), due = S.log.length && S.protection <= 0;
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    let mood = 'wave', text;
+    if (S.view === 'onboard') text = 'Nice to meet you!';
+    else if (due && r >= 3) { mood = 'alarmed'; text = 'Reapply, please!'; }
+    else if (r >= 11) { mood = 'squint'; text = 'So bright!'; }
+    else if (r >= 8) text = pick(['Phew, it\u2019s hot!', 'Stay in the shade!']);
+    else if (r === 0) text = 'Night night!';
+    else text = pick(['Hi there!', 'Hehe, that tickles!', 'Sun\u2019s out!']);
+    S.poke = { until: performance.now() + 1800, mood, text };
+    el.bubble.textContent = text;
+    haptic();
+  }
+
+  function renderOnboard() {
+    const st = S.onboardStep;
+    el.obWelcome.hidden = st !== 0;
+    el.obList.hidden = el.obTop.hidden = st === 0;
+    if (st === 1) {
+      el.obTitle.textContent = 'Skin Type';
+      el.obList.innerHTML = '<div class="list-h">Step 1 of 2</div><div class="list-intro">How does your skin react to the sun?</div>'
+        + SKIN.map((k, i) => `<button class="row" data-act="ob-skin" data-val="${i}"><div class="row-text"><div class="row-title">Type ${k.n}</div><div class="row-sub">${k.d}</div></div>${i === S.skin ? check : ''}</button>`).join('');
+    } else if (st === 2) {
+      el.obTitle.textContent = 'Sunscreen';
+      el.obList.innerHTML = '<div class="list-h">Step 2 of 2</div><div class="list-intro">Which SPF do you usually wear?</div>'
+        + SPFS.map(v => `<button class="row" data-act="ob-spf" data-val="${v}"><div class="row-text"><div class="row-title">SPF ${v === 70 ? '50+' : v}</div></div>${v === S.spf ? check : ''}</button>`).join('');
+    }
+    el.obList.scrollTop = 0;
+  }
+  function finishOnboard() {
+    S.onboardStep = 0;
+    setPage(0); showView('app', 'zoom');
+    haptic('Setup complete');
+    setSun(el.appliedSun, 'proud');
+    el.appliedTitle.textContent = 'All set!';
+    el.appliedBody.innerHTML = `Skin Type ${SKIN[S.skin].n} · SPF ${spfLabel()}<br>Tap I Applied SPF when you put sunscreen on.`;
+    showOverlay('applied');
+    clearTimeout(applySunscreen.t);
+    applySunscreen.t = setTimeout(() => { if (S.overlay === 'applied') closeOverlay(); }, 2800);
+  }
+
   function act(name, val) {
     switch (name) {
-      case 'apply': return applySunscreen();
+      case 'apply': return openCover();
+      case 'cover': closeOverlay(); return applySunscreen(+val);
+      case 'cover-cancel': return closeOverlay();
+      case 'poke': return poke();
+      case 'ob-start': S.onboardStep = 1; return showView('onboard', 'push');
+      case 'ob-skin': S.skin = +val; S.onboardStep = 2; return showView('onboard', 'push');
+      case 'ob-spf': S.spf = +val; return finishOnboard();
+      case 'widget': {
+        const w = el.widgets.find(n => n.dataset.val === val);
+        if (w && w.dataset.pos !== '0') { S.stackOffset = (S.stackOffset + +w.dataset.pos) % 3; haptic(); return; }
+        if (val === 'spf') { setPage(0); return showView('app', 'zoom'); }
+        return haptic();
+      }
       case 'settings': return showView('settings');
-      case 'back': return S.view === 'picker' ? showView('settings', 'pop') : showView('app', 'pop');
+      case 'back':
+        if (S.view === 'onboard') { S.onboardStep = Math.max(0, S.onboardStep - 1); return showView('onboard', 'pop'); }
+        return S.view === 'picker' ? showView('settings', 'pop') : showView('app', 'pop');
       case 'pick': S.picker = val; return showView('picker');
       case 'set-skin': S.skin = +val; return showView('settings', 'pop');
       case 'set-spf': S.spf = +val; return showView('settings', 'pop');
@@ -909,7 +1132,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       case 'expand': return showOverlay('long');
       case 'notif-primary': {
         const k = S.notifKind; closeOverlay();
-        if (k !== 'shade') applySunscreen();
+        if (k !== 'shade') openCover();
         return;
       }
       case 'notif-snooze': {
@@ -928,6 +1151,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   function crownPress() {
     haptic();
     if (S.overlay) return closeOverlay();
+    if (S.view === 'onboard') return;
     if (S.view === 'face') { setPage(0); showView('app', 'zoom'); }
     else showView('face', 'zoom');
   }
@@ -977,7 +1201,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
     el.glow.style.setProperty('--glow', due && r >= 3 ? '#FF453A' : cat.color);
     let mood = r === 0 ? 'sleepy' : (due && r >= 3) ? 'alarmed' : r < 3 ? 'sleepy' : r < 6 ? 'happy' : r < 8 ? 'cool' : 'hot';
     const needs = r >= 3 && (!applied || due);
-    setSun(el.homeSun, mood, { bottle: needs });
+    const poked = S.poke && performance.now() < S.poke.until;
+    if (poked) mood = S.poke.mood;
+    el.bubble.classList.toggle('show', !!poked && S.view === 'app');
+    setSun(el.homeSun, mood, { bottle: needs && !poked });
+    if (S.view === 'onboard') setSun(el.obSun, poked ? 'proud' : 'wave');
 
     const p = S.protection;
     const ringColor = due ? '#FF453A' : p > 0.5 ? '#30D158' : p > 0.2 ? '#FFD60A' : '#FF9F0A';
@@ -1029,14 +1257,47 @@ button { font: inherit; color: inherit; cursor: pointer; }
     setText(el.doseFoot, `Skin Type ${SKIN[S.skin].n} · SPF ${spfLabel()}`);
     setText(el.sunTime, fmtDur(S.sunMinutes));
     setText(el.appCount, `${S.log.length}×`);
-    setText(el.lastApplied, applied ? `Last applied at ${fmtClockAP(S.log[S.log.length - 1])}` : 'Not applied yet today');
+    setText(el.lastApplied, applied ? `${fmtClockAP(S.log[S.log.length - 1])} · ${COVER[S.coverage].name}` : 'Not yet today');
 
-    // Watch face
-    if (S.view === 'face') {
+    // Smart Stack relevance: SPF Watch rises to the top when you need to act soon
+    const spfRelevant = r >= 3 && (!applied || due || rem <= 15);
+    if (spfRelevant !== S.spfTop) {
+      S.spfTop = spfRelevant; S.stackOffset = 0;
+      if (spfRelevant) {
+        logEvent('Smart Stack · SPF Watch moved to the top');
+        el.widget.classList.remove('promoted'); void el.widget.offsetWidth; el.widget.classList.add('promoted');
+      }
+    }
+    const order = S.spfTop ? ['spf', 'weather', 'cal'] : ['weather', 'spf', 'cal'];
+    for (const w of el.widgets) {
+      const pos = String((order.indexOf(w.dataset.val) - S.stackOffset + 3) % 3);
+      if (w.dataset.pos !== pos) w.dataset.pos = pos;
+    }
+
+    // Watch faces
+    if (S.view === 'face' && S.face === 'corners') {
+      setText(el.kUv, String(r)); el.kUv.style.color = cat.color;
+      arcs.tl.setAttribute('stroke-dasharray', `${Math.min(100, uv / 12 * 100).toFixed(2)} 100`); arcs.tl.style.stroke = cat.color;
+      arcs.tr.setAttribute('stroke-dasharray', `${(p * 100).toFixed(2)} 100`); arcs.tr.style.stroke = ringColor; arcs.tr.style.opacity = p > 0 ? 1 : 0;
+      setSun(el.kProtSun, due && r >= 3 ? 'alarmed' : 'happy');
+      setText(el.kDose, `${Math.round(S.dose * 100)}%`);
+      arcs.bl.setAttribute('stroke-dasharray', `${Math.min(100, S.dose * 100).toFixed(2)} 100`);
+      arcs.bl.style.stroke = S.dose >= .8 ? '#FF453A' : S.dose >= .5 ? '#FF9F0A' : '#FFD60A';
+      setText(el.kDay, String(Math.floor(S.sunMinutes)));
+      arcs.br.setAttribute('stroke-dasharray', `${Math.min(100, S.sunMinutes / 120 * 100).toFixed(2)} 100`); arcs.br.style.stroke = '#64D2FF';
+      setText(el.kInline, due && r >= 3 ? `UV ${r} · Reapply now` : applied && r > 0 ? `UV ${r} · Reapply in ${fmtDur(rem)}` : `UV ${r} · ${cat.name}`);
+      setSun(el.kSun, mood, { bottle: needs && !poked });
+    }
+    if (S.view === 'face' && S.face === 'stack') {
+      const h = S.minutes / 60, wx = { overcast: ['Cloudy', '#5B6C82', '#8796AA', 0], sunny: ['Sunny', '#2F7DDB', '#5DB2F0', 2], beach: ['Sunny', '#1E88E5', '#4FC3F7', 4] }[S.weather];
+      setText(el.wtLabel, wx[0]);
+      setText(el.wtTemp, `${Math.round(19 + wx[3] + 8 * Math.max(0, Math.sin(Math.PI * (h - 7) / 14)))}°`);
+      setText(el.wtSub, `H:${27 + wx[3]}° L:${18 + wx[3]}°`);
+      el.weatherWidget.style.background = `linear-gradient(170deg, ${wx[1]}, ${wx[2]})`;
       if (due) { setText(el.wLabel, 'SPF Watch'); setText(el.wBig, 'Reapply'); setText(el.wSub, `UV ${r} · ${cat.name}`); }
       else if (applied && r > 0) { setText(el.wLabel, 'Reapply in'); setText(el.wBig, fmtDur(rem)); setText(el.wSub, `UV ${r} · ${cat.name}`); }
       else { setText(el.wLabel, 'SPF Watch'); setText(el.wBig, `UV ${r}`); setText(el.wSub, r >= 3 ? 'Put on sunscreen' : cat.name); }
-      el.widget.style.background = r === 0 ? 'linear-gradient(170deg,#1B2350,#3B3F8F)' : due && r >= 3 ? 'linear-gradient(170deg,#E0532E,#F79B45)' : 'linear-gradient(170deg,#2F7DDB,#5DB2F0)';
+      el.widget.style.background = r === 0 ? 'linear-gradient(170deg,#1B2350,#3B3F8F)' : due && r >= 3 ? 'linear-gradient(170deg,#D93B2B,#F07A3A)' : '';
       setSun(el.wSun, mood, { bottle: needs });
       setSun(el.cSun, mood);
       setText(el.cUv, String(r));
@@ -1058,7 +1319,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
     el.followBtn.disabled = S.uvOverride == null;
     el.followBtn.textContent = S.uvOverride == null ? 'Following forecast' : 'Follow forecast';
     el.outdoors.checked = S.outdoors;
-    el.pausedNote.hidden = !(S.overlay && S.playing);
+    el.pausedNote.hidden = !((S.overlay || S.view === 'onboard') && S.playing);
+    setText(el.pausedNote, S.view === 'onboard' ? 'Paused during setup' : 'Paused for notification');
+    for (const b of el.faceSeg.children) b.setAttribute('aria-pressed', String(b.dataset.face === S.face));
     const playIcon = S.playing
       ? '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>'
       : '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.2v11.6a.8.8 0 0 0 1.2.7l9-5.8a.8.8 0 0 0 0-1.4l-9-5.8a.8.8 0 0 0-1.2.7z"/></svg>';
@@ -1072,7 +1335,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   let last = performance.now();
   function frame(t) {
     const dt = Math.min(250, t - last); last = t;
-    if (S.playing && !S.overlay) advance(dt / 1000 * S.speed / 60);
+    if (S.playing && !S.overlay && S.view !== 'onboard') advance(dt / 1000 * S.speed / 60);
     runChecks();
     update();
     requestAnimationFrame(frame);
@@ -1080,7 +1343,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   // ---------- Input: taps, swipes, Digital Crown ----------
   let drag = null, suppressClick = false;
-  const scrollerFor = () => S.overlay === 'long' ? el.oLong : S.view === 'settings' ? el.settingsList : S.view === 'picker' ? el.pickerList : null;
+  const scrollerFor = () => S.overlay === 'long' ? el.oLong : S.overlay === 'cover' ? el.coverList : S.overlay ? null
+    : S.view === 'settings' ? el.settingsList : S.view === 'picker' ? el.pickerList : (S.view === 'onboard' && S.onboardStep > 0) ? el.obList : null;
   const scale = () => el.device.getBoundingClientRect().width / 250;
 
   el.screen.addEventListener('pointerdown', e => {
@@ -1102,7 +1366,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
       suppressClick = true; setTimeout(() => { suppressClick = false; }, 0);
       if (S.overlay === 'short') showOverlay('long');
       else if (!S.overlay && S.view === 'app' && Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx)) setPage(S.page + (dy < 0 ? 1 : -1));
-      else if (!S.overlay && (S.view === 'settings' || S.view === 'picker') && dx > 50 && Math.abs(dx) > Math.abs(dy)) act('back');
+      else if (!S.overlay && (S.view === 'settings' || S.view === 'picker' || (S.view === 'onboard' && S.onboardStep > 0)) && dx > 50 && Math.abs(dx) > Math.abs(dy)) act('back');
+      else if (!S.overlay && S.view === 'face' && S.face === 'stack' && Math.abs(dy) > 24) { S.stackOffset = (S.stackOffset + (dy < 0 ? 1 : 2)) % 3; haptic(); }
     }
     drag = null;
   });
@@ -1118,11 +1383,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
     el.crown.style.setProperty('--crown-shift', `${crownShift}px`);
     const sc = scrollerFor();
     if (sc) { sc.scrollTop += delta; return; }
-    if (S.overlay || S.view !== 'app') return;
+    const stack = S.view === 'face' && S.face === 'stack';
+    if (S.overlay || (S.view !== 'app' && !stack)) return;
     crownAcc += delta;
     const t = performance.now();
     if (Math.abs(crownAcc) > 40 && t > crownLock) {
-      setPage(S.page + Math.sign(crownAcc));
+      if (stack) { S.stackOffset = (S.stackOffset + (crownAcc > 0 ? 1 : 2)) % 3; haptic(); }
+      else setPage(S.page + Math.sign(crownAcc));
       crownAcc = 0; crownLock = t + 420;
     }
   }
@@ -1151,12 +1418,26 @@ button { font: inherit; color: inherit; cursor: pointer; }
   el.followBtn.addEventListener('click', () => { S.uvOverride = null; });
   el.outdoors.addEventListener('change', () => { S.outdoors = el.outdoors.checked; logEvent(S.outdoors ? 'Stepped outside' : 'Went indoors'); });
   $('aSwim').addEventListener('click', swim);
+  el.faceSeg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.face = b.dataset.face; closeOverlay(); showView('face', 'zoom');
+  });
+  $('aAlmost').addEventListener('click', () => {
+    closeOverlay();
+    if (!S.log.length) S.log.push(Math.max(DAY_START, S.minutes - 90));
+    if (currentUV() < 3) S.uvOverride = 7;
+    S.protection = 14 / intervalFor(currentUV());
+    S.flags.reapply = false; S.snoozeUntil = null;
+    S.face = 'stack'; S.stackOffset = 0; showView('face', 'zoom');
+    logEvent('Jumped to 14 minutes before reapply');
+  });
+  $('aSetup').addEventListener('click', () => { closeOverlay(); S.onboardStep = 0; showView('onboard', 'zoom'); });
   $('aRemind').addEventListener('click', sendReminder);
   $('aFace').addEventListener('click', crownPress);
   $('aReset').addEventListener('click', () => {
     const keep = { skin: S.skin, spf: S.spf, waterResistant: S.waterResistant, reminders: S.reminders, onlyUV3: S.onlyUV3, speed: S.speed, weather: S.weather };
     S = Object.assign(fresh(), keep, {
-      minutes: 8 * 60 + 30, protection: 0, log: [], sunMinutes: 0, dose: 0,
+      minutes: 8 * 60 + 30, protection: 0, log: [], sunMinutes: 0, dose: 0, view: 'app', face: S.face, coverage: S.coverage,
       flags: { start: false, reapply: false, shade: false },
     });
     closeOverlay(); showView('app', 'zoom');
@@ -1178,6 +1459,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   fit();
   S.page = -1; setPage(0);
+  showView('onboard', 'zoom');
   renderLog();
   logEvent('Sunscreen logged at 9:52 AM');
   S.events[0].t = 9 * 60 + 52; renderLog();
