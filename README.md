@@ -44,7 +44,7 @@ Sun dose is a rough estimate: UV × minutes ÷ the skin type's burn threshold. S
 
 Sleepy (UV 0–2) · Happy (3–5) · Cool, with sunglasses (6–7) · Hot and sweaty (8+) · Alarmed, holding a bottle (time to reapply) · Proud (just applied).
 
-Tap Sunny and he reacts with a speech bubble and a wrist tap: he waves at normal UV, squints at extreme UV ("So bright!") and pleads when it's time to reapply.
+Tap Sunny for a reaction with a speech bubble and a wrist tap: a wave at normal UV, a squint at extreme UV ("So bright!") and a plea when it's time to reapply.
 
 ## Controls
 
