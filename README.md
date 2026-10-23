@@ -69,14 +69,27 @@ Pick a character above the mood row on the page. Every character supports every 
 
 | Character | Concept |
 | --- | --- |
-| **Sunny** | The original: a round sun with alternating long and short rays and a glossy, kawaii face |
+| **Sunny** | The default: a 12-point wavy badge with a flat yellow-to-orange gradient and simple black line-art faces |
 | **Mochi** | A soft, scalloped blob in peachy pastels with a pulsing halo instead of rays. It squishes gently as it breathes |
 | **Tide** | A sun sitting on the sea. It sinks below the horizon at low UV and climbs higher as UV rises; the bottle floats on the waves |
 | **Glyph** | A flat, SF Symbols-style sun filled with the watchOS UV category color (green, yellow, orange, red, purple), so the character is also the UV readout |
 
 ## Moods
 
-Sleepy (UV 0–2) · Happy (3–5) · Cool, with sunglasses (6–7) · Hot and sweaty (8+) · Alarmed, holding a bottle (time to reapply) · Proud (just applied).
+Sunny has nine faces:
+
+| Face | When |
+| --- | --- |
+| Calm (eyes closed, smile) | Night, UV 0 |
+| Cloudy (peeking over clouds) | UV 1–2 |
+| Happy | UV 3–5 |
+| Cool (sunglasses) | UV 6–7 |
+| Hot (orange, tired frown) | UV 8+ |
+| Upset (red-orange, angry brows) | Sunscreen has worn off |
+| Proud (big grin, cheeks, burst lines) | Just applied |
+| Wink and Blush | Tap reactions |
+
+The other characters map Calm to Sleepy and Blush to Wave.
 
 Tap Sunny for a reaction with a speech bubble and a wrist tap: a wave at normal UV, a squint at extreme UV ("So bright!") and a plea when it's time to reapply.
 

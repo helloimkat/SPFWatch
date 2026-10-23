@@ -96,6 +96,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .intro h2 { font: 700 13px/1 var(--sf); letter-spacing: .06em; text-transform: uppercase; margin: 6px 0 0; color: var(--ink); }
 
 .moods { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 420px) { .moods { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .mood {
   display: grid; justify-items: center; gap: 4px;
   padding: 8px 2px 6px; border-radius: 14px;
@@ -351,6 +352,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .sun .sparkle:nth-of-type(2) { animation-delay: .45s; }
 .sun .sparkle:nth-of-type(3) { animation-delay: .9s; }
 .sun .drop { animation: drip 1.8s ease-in infinite; }
+.sun .burst { transform-box: fill-box; transform-origin: center; animation: burst 1.2s ease-in-out infinite; }
+.sun .cloud { animation: clouds 4s ease-in-out infinite alternate; }
+@keyframes burst { 50% { transform: scale(1.08); opacity: .65; } }
+@keyframes clouds { to { transform: translateX(1.8px); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes bob { 50% { transform: translateY(-1.6px); } }
 @keyframes wiggle { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
@@ -1035,6 +1040,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   function sunSVG(mood, { bottle = false } = {}, ch = character) {
     const id = 'sg' + (++uid);
+    if (ch !== 'sunny') mood = { calm: 'sleepy', blush: 'wave' }[mood] || mood;
     const wrap = inner => `<svg class="sun sun--${mood} ch-${ch}" viewBox="-50 -50 100 100" aria-hidden="true">${inner}</svg>`;
     const grad = (P, cx = '38%', cy = '32%') => `<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="75%"><stop offset="0" stop-color="${P[0]}"/><stop offset=".55" stop-color="${P[1]}"/><stop offset="1" stop-color="${P[2]}"/></radialGradient>`;
 
@@ -1080,19 +1086,59 @@ button { font: inherit; color: inherit; cursor: pointer; }
         <g class="body"><circle r="24" fill="${C}"/><g transform="scale(.8)">${face}</g>${bottle ? `<g transform="translate(23 15) rotate(-16) scale(.9)">${bottleArt(P)}</g>` : ''}</g>${extra}`);
     }
 
-    // Sunny: the original, with alternating long and short rays
-    const P = WARM[mood];
-    const { face, extra } = faceParts(mood, P);
-    let rays = '';
-    for (let i = 0; i < 12; i++) {
-      let h = i % 2 ? 9 : 13;
-      if (mood === 'sleepy') h *= 0.7;
-      rays += `<rect x="-3.4" y="${-(33 + h)}" width="6.8" height="${h}" rx="3.4" transform="rotate(${i * 30})"/>`;
-    }
-    return wrap(`<defs>${grad(P)}</defs>
-      <g class="rays" fill="${P[3]}">${rays}</g>
-      <g class="body"><circle r="29" fill="url(#${id})"/><ellipse cx="-10" cy="-16" rx="8" ry="4.2" fill="#fff" opacity=".35" transform="rotate(-28 -10 -16)"/>${face}${bottle ? `<g transform="translate(24 16) rotate(-16)">${bottleArt(P)}</g>` : ''}</g>
+    // Sunny: a 12-point scalloped badge, flat gradient, black line-art faces
+    const tone = mood === 'alarmed' ? 'red' : (mood === 'hot' || mood === 'squint') ? 'orange' : 'yellow';
+    const [c0, c1] = SUNNY_TONES[tone];
+    const { face, extra } = sunnyFace(mood);
+    return wrap(`<defs><linearGradient id="${id}" x1=".25" y1="0" x2=".75" y2="1"><stop offset="0" stop-color="${c0}"/><stop offset="1" stop-color="${c1}"/></linearGradient></defs>
+      <g class="body"><path d="${SUNNY_PATH}" fill="url(#${id})"/>${face}${bottle ? `<g transform="translate(25 17) rotate(-16)">${bottleArt([c0, c1, c1])}</g>` : ''}</g>
       ${extra}`);
+  }
+
+  // Sunny's shape: 12 rounded points, one pointing straight up
+  const SUNNY_PATH = (() => {
+    let d = '';
+    for (let i = 0; i < 240; i++) {
+      const t = i / 240 * Math.PI * 2, c = Math.cos(12 * t), a = t - Math.PI / 2;
+      // slightly sharper tips, rounder valleys
+      const r = 37 + 3.1 * (c > 0 ? Math.pow(c, 1.5) : -Math.pow(-c, .7));
+      d += (i ? 'L' : 'M') + (r * Math.cos(a)).toFixed(2) + ' ' + (r * Math.sin(a)).toFixed(2);
+    }
+    return d + 'Z';
+  })();
+  const SUNNY_TONES = { yellow: ['#FFDA4F', '#FFB938'], orange: ['#FFB43C', '#FF9629'], red: ['#FF9C3E', '#FF6A1F'] };
+  function sunnyFace(mood) {
+    const K = '#1E1A16';
+    const line = (d, w = 2.3) => `<path d="${d}" fill="none" stroke="${K}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const closed = line('M-15 0 Q-10.5 5 -6 0 M6 0 Q10.5 5 15 0');
+    const oval = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="1.9" ry="3.2" fill="${K}"/>`;
+    const cheeks = '<circle cx="-17" cy="7" r="5.4" fill="#FF9A3C"/><circle cx="17" cy="7" r="5.4" fill="#FF9A3C"/>';
+    switch (mood) {
+      case 'calm':    return { face: closed + line('M-7 8.5 Q0 14 7 8.5'), extra: '' };
+      case 'sleepy':  return {
+        face: `<g transform="translate(0 -5)">${closed + line('M-7 8.5 Q0 14 7 8.5')}</g>`,
+        extra: '<g class="cloud" fill="#F7F2E9"><rect x="-47" y="21" width="45" height="14" rx="7"/><circle cx="-20" cy="18" r="12"/><circle cx="-35" cy="23" r="8.5"/><rect x="2" y="21" width="45" height="14" rx="7"/><circle cx="20" cy="18" r="12"/><circle cx="35" cy="23" r="8.5"/></g>' };
+      case 'happy':   return { face: oval(-8, -3) + oval(8, -3) + line('M-12.5 4.5 Q0 18 12.5 4.5', 2.5), extra: '' };
+      case 'cool':    return {
+        face: `<path d="M-25 -10.5 H25 V-7 Q25 -6 24 -5 L22 1 Q21 4 17 4 H8 Q4 4 3 0 L2 -4.5 H-2 L-3 0 Q-4 4 -8 4 H-17 Q-21 4 -22 1 L-24 -5 Q-25 -6 -25 -7 Z" fill="#141414"/><path d="M-19.5 -6.5 l2.6 -1.4 M7.5 -6.5 l2.6 -1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>` + line('M-7 9 Q0 14 7 9'),
+        extra: '' };
+      case 'proud':   {
+        let burst = '';
+        for (const a of [-125, -55, -152, -28, 180, 0, 152, 28, 125, 55]) {
+          const r = a * Math.PI / 180, x0 = 43.5 * Math.cos(r), y0 = 43.5 * Math.sin(r), x1 = 49 * Math.cos(r), y1 = 49 * Math.sin(r);
+          burst += `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} L${x1.toFixed(1)} ${y1.toFixed(1)}"/>`;
+        }
+        return {
+          face: line('M-14 -1 Q-10 -7 -6 -1 M6 -1 Q10 -7 14 -1', 2.4) + `<path d="M-6.5 4 H6.5 Q7.2 4 7 5 Q6 14 0 14 Q-6 14 -7 5 Q-7.2 4 -6.5 4Z" fill="${K}"/>` + cheeks,
+          extra: `<g class="burst" stroke="#FFC02E" stroke-width="3" stroke-linecap="round">${burst}</g>` };
+      }
+      case 'blush':   return { face: closed + line('M-6 8 Q0 13 6 8') + cheeks, extra: '' };
+      case 'wave':    return { face: oval(-8, -3) + line('M5 -2 Q9 -7 13 -2') + line('M-12 5 Q0 17 12 5', 2.5), extra: '' };
+      case 'hot':
+      case 'squint':  return { face: closed + line('M-6 12.5 Q0 7.5 6 12.5'), extra: '' };
+      case 'alarmed': return { face: line('M-15 -10 L-6 -6 M15 -10 L6 -6', 2.8) + oval(-9, -1) + oval(9, -1) + line('M-7 12 Q0 6 7 12', 2.5), extra: '' };
+    }
+    return { face: oval(-8, -3) + oval(8, -3) + line('M-12.5 4.5 Q0 18 12.5 4.5', 2.5), extra: '' };
   }
   const sunCache = new WeakMap();
   function setSun(el, mood, opts = {}) {
@@ -1174,12 +1220,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   // Mood legend in the intro
   const MOODS = [
-    { mood: 'sleepy', label: 'UV 0–2', uv: 1 }, { mood: 'happy', label: 'UV 3–5', uv: 4 },
-    { mood: 'cool', label: 'UV 6–7', uv: 7 }, { mood: 'hot', label: 'UV 8+', uv: 9 },
-    { mood: 'alarmed', label: 'Reapply', remind: true },
+    { mood: 'sleepy', name: 'Cloudy', label: 'UV 1–2', uv: 1 }, { mood: 'happy', name: 'Happy', label: 'UV 3–5', uv: 4 },
+    { mood: 'cool', name: 'Cool', label: 'UV 6–7', uv: 7 }, { mood: 'hot', name: 'Hot', label: 'UV 8+', uv: 9 },
+    { mood: 'alarmed', name: 'Upset', label: 'Reapply', remind: true },
+    { mood: 'proud', name: 'Proud', label: 'Applied', poke: 'Protected!' }, { mood: 'wave', name: 'Wink', label: 'Tap', poke: 'Hi there!' },
+    { mood: 'blush', name: 'Blush', label: 'Tap', poke: 'Hehe, that tickles!' }, { mood: 'calm', name: 'Calm', label: 'Night', uv: 0 },
   ];
   function renderCharacter() {
-    $('moods').innerHTML = MOODS.map((m, i) => `<button class="mood" data-i="${i}" aria-label="Show ${m.mood} mood">${sunSVG(m.mood)}<span><b>${m.mood[0].toUpperCase() + m.mood.slice(1)}</b>${m.label}</span></button>`).join('');
+    const list = character === 'sunny' ? MOODS : MOODS.slice(0, 7);
+    $('moods').innerHTML = list.map((m, i) => `<button class="mood" data-i="${i}" aria-label="Show ${m.name} mood">${sunSVG(m.mood)}<span><b>${m.name}</b>${m.label}</span></button>`).join('');
     $('chars').innerHTML = CHARS.map(c => `<button class="char" data-char="${c.id}" aria-pressed="${c.id === character}"><span class="char-art">${sunSVG('happy', {}, c.id)}</span><span><b>${c.name}</b>${c.d}</span></button>`).join('');
     for (const n of document.getElementsByClassName('js-charname')) n.textContent = charName();
   }
@@ -1199,6 +1248,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     const m = MOODS[+b.dataset.i];
     closeOverlay(); if (S.view !== 'app') showView('app', 'zoom'); setPage(0);
     if (m.remind) return sendReminder();
+    if (m.poke) { S.poke = { until: performance.now() + 2200, mood: m.mood, text: m.poke }; el.bubble.textContent = m.poke; return; }
     S.uvOverride = m.uv; S.outdoors = true;
     if (S.protection <= 0 && S.log.length) S.protection = 0.6;
   });
@@ -1396,6 +1446,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     else if (r >= 8) text = pick(['Phew, it\u2019s hot!', 'Stay in the shade!']);
     else if (r === 0) text = 'Night night!';
     else text = pick(['Hi there!', 'Hehe, that tickles!', 'Sun\u2019s out!']);
+    if (text === 'Hehe, that tickles!') mood = 'blush';
     S.poke = { until: performance.now() + 1800, mood, text };
     el.bubble.textContent = text;
     haptic();
@@ -1529,7 +1580,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     el.appTitle.style.color = S.page === 0 ? cat.color : '';
     el.appTitle.hidden = S.page === 0 && layout === 'hero'; // Hero shows UV in its own pill
     el.glow.style.setProperty('--glow', due && r >= 3 ? '#FF453A' : cat.color);
-    let mood = r === 0 ? 'sleepy' : (due && r >= 3) ? 'alarmed' : r < 3 ? 'sleepy' : r < 6 ? 'happy' : r < 8 ? 'cool' : 'hot';
+    let mood = r === 0 ? 'calm' : (due && r >= 3) ? 'alarmed' : r < 3 ? 'sleepy' : r < 6 ? 'happy' : r < 8 ? 'cool' : 'hot';
     const needs = r >= 3 && (!applied || due);
     const poked = S.poke && performance.now() < S.poke.until;
     if (poked) mood = S.poke.mood;
