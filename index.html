@@ -414,6 +414,47 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @keyframes wave { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
 .card-line { font: 600 14px/1.25 var(--sf); }
 
+/* Main screen layouts */
+.lay { display: none; position: absolute; inset: 0; }
+#nowPage[data-layout="ring"] .lay-ring, #nowPage[data-layout="hero"] .lay-hero,
+#nowPage[data-layout="gauge"] .lay-gauge, #nowPage[data-layout="cards"] .lay-cards { display: block; }
+#nowPage[data-layout="hero"] .bubble { left: 150px; top: 36px; }
+#nowPage[data-layout="gauge"] .bubble { top: 70px; }
+#nowPage[data-layout="cards"] .bubble { left: 150px; top: 36px; }
+
+.hero-sky { position: absolute; inset: 0; background: radial-gradient(circle at 95% 62%, var(--hero, #FF9F0A) 0, transparent 62%); opacity: .5; transition: background 1s; pointer-events: none; }
+.hero-sun { position: absolute; right: -32px; top: 56px; width: 138px; height: 138px; cursor: pointer; }
+.hero-sun svg, .gauge-sun svg, .cc-sun svg { width: 100%; height: 100%; overflow: visible; }
+.hero-text { position: absolute; left: 14px; top: 50px; width: 116px; }
+.hero-big { font: 800 30px/1 var(--sfr); letter-spacing: -.5px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 8px rgba(0,0,0,.55); transition: color .4s; }
+.hero-cap { margin-top: 4px; font: 500 12px/1.2 var(--sf); color: rgba(255,255,255,.72); text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+.hero-bar { margin-top: 9px; width: 92px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.18); overflow: hidden; }
+.hero-bar i, .cc-bar i { display: block; height: 100%; width: 0; border-radius: 3px; transition: width .4s, background .4s; }
+.hero-uv { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 3px 9px 3px 3px; border-radius: 999px; font: 600 11.5px/1 var(--sf); white-space: nowrap; }
+.hero-uv b { display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; color: #000; font: 800 11px/1 var(--sfr); transition: background .6s; }
+
+.gauge { position: absolute; left: 12.5px; top: 40px; width: 180px; height: 104px; overflow: visible; }
+.gauge path { fill: none; stroke-width: 10; transition: opacity .4s; }
+.gauge text { font: 800 11px var(--sfr); fill: #000; }
+#gKnob { transition: transform .5s cubic-bezier(.22,1,.36,1); }
+.gauge-sun { position: absolute; left: 50%; top: 76px; width: 68px; height: 68px; margin-left: -34px; cursor: pointer; }
+.gauge-cols { position: absolute; left: 12px; right: 16px; top: 150px; display: grid; grid-template-columns: 1fr 1fr; }
+.gauge-cols > div { text-align: center; }
+.gauge-cols > div + div { border-left: 1px solid rgba(255,255,255,.16); }
+.gc-l { font: 600 9.5px/1.2 var(--sf); letter-spacing: .5px; text-transform: uppercase; color: rgba(255,255,255,.55); }
+.gc-v { font: 800 19px/1.2 var(--sfr); font-variant-numeric: tabular-nums; transition: color .4s; }
+
+.ccard { position: absolute; left: 10px; right: 14px; border-radius: 20px; padding: 9px 12px; transition: background .6s; }
+.cc-main { top: 46px; height: 86px; }
+.cc-label { font: 600 12.5px/1.2 var(--sf); transition: color .6s; }
+.cc-big { max-width: 108px; margin-top: 1px; white-space: nowrap; font: 800 22px/1.1 var(--sfr); font-variant-numeric: tabular-nums; letter-spacing: -.3px; }
+.cc-sun { position: absolute; right: 6px; top: 8px; width: 46px; height: 46px; cursor: pointer; }
+.cc-bar { position: absolute; left: 12px; right: 12px; bottom: 11px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+.cc-uv { top: 138px; height: 56px; display: flex; align-items: center; gap: 10px; }
+.cc-uvnum { min-width: 22px; font: 900 30px/1 var(--sfr); font-variant-numeric: tabular-nums; transition: color .6s; }
+.cc-uvcat { font: 600 14px/1.15 var(--sf); transition: color .6s; }
+.cc-uvpeak { font: 500 11.5px/1.2 var(--sf); color: rgba(255,255,255,.6); }
+
 /* ---------- Simulator panel ---------- */
 .panel { max-width: 340px; justify-self: start; display: grid; gap: 14px; width: 100%; }
 .group { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; }
@@ -497,17 +538,53 @@ button { font: inherit; color: inherit; cursor: pointer; }
           <!-- App: vertical pages -->
           <div class="view" id="v-app">
             <div class="pages" id="pages">
-              <section class="page" aria-label="Now">
-                <div class="glow" id="glow"></div>
-                <div class="ring-wrap" id="ringWrap">
-                  <svg viewBox="0 0 110 110"><circle class="ring-track" id="ringTrack" cx="55" cy="55" r="51"/><circle class="ring-fill" id="ringFill" cx="55" cy="55" r="51" pathLength="100" stroke-dasharray="0 100"/></svg>
-                  <div class="ring-sun" id="homeSun" data-act="poke" role="button" aria-label="Tap Sunny"></div>
+              <section class="page" aria-label="Now" id="nowPage" data-layout="ring">
+                <!-- Ring: protection ring around the character -->
+                <div class="lay lay-ring">
+                  <div class="glow" id="glow"></div>
+                  <div class="ring-wrap" id="ringWrap">
+                    <svg viewBox="0 0 110 110"><circle class="ring-track" id="ringTrack" cx="55" cy="55" r="51"/><circle class="ring-fill" id="ringFill" cx="55" cy="55" r="51" pathLength="100" stroke-dasharray="0 100"/></svg>
+                    <div class="ring-sun" id="homeSun" data-act="poke" role="button" aria-label="Tap the sun"></div>
+                  </div>
+                  <div class="status">
+                    <div class="status-big" id="statusBig">–</div>
+                    <div class="status-cap" id="statusCap"></div>
+                  </div>
+                </div>
+                <!-- Hero: oversized character bleeding off the edge, countdown first -->
+                <div class="lay lay-hero">
+                  <div class="hero-sky" id="heroSky"></div>
+                  <div class="hero-sun" id="heroSun" data-act="poke" role="button" aria-label="Tap the sun"></div>
+                  <div class="hero-text">
+                    <div class="hero-big" id="heroBig">–</div>
+                    <div class="hero-cap" id="heroCap"></div>
+                    <div class="hero-bar"><i id="heroBar"></i></div>
+                    <div class="glass hero-uv"><b id="heroUvNum">0</b><span id="heroUvCat">Low</span></div>
+                  </div>
+                </div>
+                <!-- Gauge: the UV index is the headline -->
+                <div class="lay lay-gauge">
+                  <svg class="gauge" id="gauge" viewBox="0 0 180 104"></svg>
+                  <div class="gauge-sun" id="gaugeSun" data-act="poke" role="button" aria-label="Tap the sun"></div>
+                  <div class="gauge-cols">
+                    <div><div class="gc-l" id="gcL1">Reapply in</div><div class="gc-v" id="gcV1">–</div></div>
+                    <div><div class="gc-l">Protected</div><div class="gc-v" id="gcV2">0%</div></div>
+                  </div>
+                </div>
+                <!-- Cards: two glanceable tinted cards -->
+                <div class="lay lay-cards">
+                  <div class="ccard cc-main" id="ccMain">
+                    <div class="cc-label" id="ccLabel">Reapply in</div>
+                    <div class="cc-big" id="ccBig">–</div>
+                    <div class="cc-sun" id="ccSun" data-act="poke" role="button" aria-label="Tap the sun"></div>
+                    <div class="cc-bar"><i id="ccBar"></i></div>
+                  </div>
+                  <div class="ccard cc-uv" id="ccUv">
+                    <div class="cc-uvnum" id="ccUvNum">0</div>
+                    <div><div class="cc-uvcat" id="ccUvCat">Low</div><div class="cc-uvpeak" id="ccUvPeak">Peak 8 at 1 PM</div></div>
+                  </div>
                 </div>
                 <div class="glass bubble" id="bubble" aria-live="polite"></div>
-                <div class="status">
-                  <div class="status-big" id="statusBig">–</div>
-                  <div class="status-cap" id="statusCap"></div>
-                </div>
                 <button class="glass capsule home-btn" id="homeBtn" data-act="apply">
                   <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 1h4v2.5H6z"/><path d="M4.5 5.2C4.5 4.5 5 4 5.7 4h4.6c.7 0 1.2.5 1.2 1.2V14a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z" opacity=".95"/></svg>
                   <span id="homeBtnLabel">Applied SPF</span>
@@ -720,6 +797,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
       <div class="field-row"><label for="uvRange">UV override</label><button class="link-btn" id="followBtn">Follow forecast</button></div>
       <input class="range" type="range" id="uvRange" min="0" max="12" step="1" value="7">
       <div class="field-row"><label for="outdoors">Outdoors</label><input class="switch" type="checkbox" id="outdoors" checked></div>
+    </section>
+
+    <section class="group">
+      <h2>Main screen layout</h2>
+      <div class="seg" role="group" aria-label="Main screen layout" id="layoutSeg">
+        <button data-layout="ring">Ring<small>current</small></button>
+        <button data-layout="hero">Hero<small>big sun</small></button>
+        <button data-layout="gauge">Gauge<small>UV first</small></button>
+        <button data-layout="cards">Cards<small>glanceable</small></button>
+      </div>
     </section>
 
     <section class="group">
@@ -953,7 +1040,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
     device: $('device'), wrap: $('deviceWrap'), kase: $('case'), screen: $('screen'), crown: $('crown'),
     pages: $('pages'), dots: [...$('dots').children], appTitle: $('appTitle'),
     glow: $('glow'), ringWrap: $('ringWrap'), ringTrack: $('ringTrack'), ringFill: $('ringFill'), homeSun: $('homeSun'),
-    statusBig: $('statusBig'), statusCap: $('statusCap'), homeBtn: $('homeBtn'), homeBtnLabel: $('homeBtnLabel'),
+    statusBig: $('statusBig'), statusCap: $('statusCap'),
+    nowPage: $('nowPage'), layoutSeg: $('layoutSeg'),
+    heroSky: $('heroSky'), heroSun: $('heroSun'), heroBig: $('heroBig'), heroCap: $('heroCap'), heroBar: $('heroBar'), heroUvNum: $('heroUvNum'), heroUvCat: $('heroUvCat'),
+    gauge: $('gauge'), gaugeSun: $('gaugeSun'), gcL1: $('gcL1'), gcV1: $('gcV1'), gcV2: $('gcV2'),
+    ccMain: $('ccMain'), ccLabel: $('ccLabel'), ccBig: $('ccBig'), ccSun: $('ccSun'), ccBar: $('ccBar'), ccUv: $('ccUv'), ccUvNum: $('ccUvNum'), ccUvCat: $('ccUvCat'), ccUvPeak: $('ccUvPeak'), homeBtn: $('homeBtn'), homeBtnLabel: $('homeBtnLabel'),
     uvNum: $('uvNum'), uvCat: $('uvCat'), uvPeak: $('uvPeak'), uvMarker: $('uvMarker'), chart: $('chart'), chartX: $('chartX'), uvWindow: $('uvWindow'),
     doseVal: $('doseVal'), doseBar: $('doseBar'), doseFoot: $('doseFoot'), sunTime: $('sunTime'), appCount: $('appCount'), lastApplied: $('lastApplied'),
     views: { app: $('v-app'), settings: $('v-settings'), picker: $('v-picker'), face: $('v-face'), onboard: $('v-onboard') },
@@ -976,6 +1067,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
   };
   const setText = (node, v) => { if (node.textContent !== v) node.textContent = v; };
   const setHTML = (node, v) => { if (node.innerHTML !== v) node.innerHTML = v; };
+
+  // Main screen layout (per-viewer preference)
+  const LAYOUTS = ['ring', 'hero', 'gauge', 'cards'];
+  let layout = 'ring';
+  try { const l = localStorage.getItem('spfwatch.layout'); if (LAYOUTS.includes(l)) layout = l; } catch (e) { /* storage unavailable */ }
+  el.nowPage.dataset.layout = layout;
+
+  // UV gauge: a semicircle split into the five WHO categories
+  const G = { cx: 90, cy: 92, r: 76 };
+  const gPt = u => { const a = Math.PI * (1 + Math.min(12, Math.max(0, u)) / 12); return [G.cx + G.r * Math.cos(a), G.cy + G.r * Math.sin(a)]; };
+  const GSEG = [[0, 3, '#30D158'], [3, 6, '#FFD60A'], [6, 8, '#FF9F0A'], [8, 11, '#FF453A'], [11, 12, '#BF5AF2']];
+  el.gauge.innerHTML = GSEG.map(([u0, u1, c], i) => {
+    const [x0, y0] = gPt(u0 + (u0 ? .12 : 0)), [x1, y1] = gPt(u1 - (u1 < 12 ? .12 : 0));
+    return `<path id="gseg${i}" d="M${x0.toFixed(2)} ${y0.toFixed(2)} A${G.r} ${G.r} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}" stroke="${c}" stroke-linecap="${i === 0 || i === 4 ? 'round' : 'butt'}"/>`;
+  }).join('') + '<g id="gKnob"><circle r="10.5" fill="#fff" stroke="#000" stroke-width="2.5"/><text text-anchor="middle" dy=".36em" id="gKnobText">0</text></g>';
+  const gSegs = GSEG.map((_, i) => $('gseg' + i)), gKnob = $('gKnob'), gKnobText = $('gKnobText');
 
   // Static chart scaffolding: 7 AM – 7 PM
   const HOURS = Array.from({ length: 13 }, (_, i) => 7 + i);
@@ -1315,7 +1422,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
     const poked = S.poke && performance.now() < S.poke.until;
     if (poked) mood = S.poke.mood;
     el.bubble.classList.toggle('show', !!poked && S.view === 'app');
-    setSun(el.homeSun, mood, { bottle: needs && !poked });
+    const sunEl = { ring: el.homeSun, hero: el.heroSun, gauge: el.gaugeSun, cards: el.ccSun }[layout];
+    setSun(sunEl, mood, { bottle: needs && !poked });
     if (S.view === 'onboard') setSun(el.obSun, poked ? 'proud' : 'wave');
 
     const p = S.protection;
@@ -1338,6 +1446,39 @@ button { font: inherit; color: inherit; cursor: pointer; }
     const prominent = needs;
     el.homeBtn.classList.toggle('prominent', prominent);
     el.homeBtn.classList.toggle('glass', !prominent);
+
+    // Alternative layouts share the same state; only the visible one is written
+    const barColor = applied ? ringColor : 'rgba(255,255,255,.25)';
+    if (layout === 'hero') {
+      setText(el.heroBig, big); el.heroBig.style.color = color;
+      setText(el.heroCap, cap);
+      el.heroBar.style.width = `${(p * 100).toFixed(1)}%`; el.heroBar.style.background = barColor;
+      el.heroSky.style.setProperty('--hero', due && r >= 3 ? '#FF453A' : cat.color);
+      setText(el.heroUvNum, String(r)); el.heroUvNum.style.background = cat.color;
+      setText(el.heroUvCat, `UV ${cat.name}`);
+    } else if (layout === 'gauge') {
+      const catIdx = UV_CATS.indexOf(cat);
+      gSegs.forEach((sg, i) => { sg.style.opacity = i === catIdx ? 1 : .32; });
+      const [kx, ky] = gPt(uv);
+      gKnob.style.transform = `translate(${kx.toFixed(1)}px, ${ky.toFixed(1)}px)`;
+      gKnob.firstChild.setAttribute('fill', cat.color);
+      setText(gKnobText, String(r));
+      setText(el.gcL1, !applied ? 'Apply' : due ? 'Reapply' : 'Reapply in');
+      setText(el.gcV1, r === 0 ? '—' : due ? 'Now' : applied ? fmtDur(rem) : r >= 3 ? 'Now' : '—');
+      el.gcV1.style.color = (due || !applied) && r >= 3 ? '#FF6961' : '#fff';
+      setText(el.gcV2, `${Math.round(p * 100)}%`); el.gcV2.style.color = applied ? ringColor : 'rgba(255,255,255,.5)';
+    } else if (layout === 'cards') {
+      const tone = due && r >= 3 ? '#FF453A' : applied ? ringColor : r >= 3 ? cat.color : '#8E8E93';
+      el.ccMain.style.background = tone + '33';
+      el.ccLabel.style.color = tone;
+      setText(el.ccLabel, r === 0 ? 'Sun\u2019s down' : due ? 'Time to reapply' : applied ? 'Reapply in' : r >= 3 ? 'Not protected' : 'UV is low');
+      setText(el.ccBig, r === 0 ? 'Rest up' : due ? 'Now' : applied ? fmtDur(rem) : r >= 3 ? 'Apply SPF' : 'All good');
+      el.ccBar.style.width = `${(p * 100).toFixed(1)}%`; el.ccBar.style.background = barColor;
+      el.ccUv.style.background = cat.color + '2E';
+      setText(el.ccUvNum, String(r)); el.ccUvNum.style.color = cat.color;
+      setText(el.ccUvCat, cat.name); el.ccUvCat.style.color = cat.color;
+      setText(el.ccUvPeak, `Peak ${Math.round(WEATHER[S.weather])} at 1 PM`);
+    }
 
     // Forecast page
     setText(el.uvNum, String(r)); el.uvNum.style.color = cat.color;
@@ -1433,6 +1574,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     el.pausedNote.hidden = !((S.overlay || S.view === 'onboard') && S.playing);
     setText(el.pausedNote, S.view === 'onboard' ? 'Paused during setup' : 'Paused for notification');
     for (const b of el.faceSeg.children) b.setAttribute('aria-pressed', String(b.dataset.face === S.face));
+    for (const b of el.layoutSeg.children) b.setAttribute('aria-pressed', String(b.dataset.layout === layout));
     const playIcon = S.playing
       ? '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>'
       : '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.2v11.6a.8.8 0 0 0 1.2.7l9-5.8a.8.8 0 0 0 0-1.4l-9-5.8a.8.8 0 0 0-1.2.7z"/></svg>';
@@ -1529,6 +1671,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
   el.followBtn.addEventListener('click', () => { S.uvOverride = null; });
   el.outdoors.addEventListener('change', () => { S.outdoors = el.outdoors.checked; logEvent(S.outdoors ? 'Stepped outside' : 'Went indoors'); });
   $('aSwim').addEventListener('click', swim);
+  el.layoutSeg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    layout = b.dataset.layout; el.nowPage.dataset.layout = layout;
+    try { localStorage.setItem('spfwatch.layout', layout); } catch (err) { /* storage unavailable */ }
+    closeOverlay(); setPage(0);
+    if (S.view !== 'app') showView('app', 'zoom');
+  });
   el.faceSeg.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     S.face = b.dataset.face; closeOverlay(); showView('face', 'zoom');

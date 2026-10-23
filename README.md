@@ -40,6 +40,17 @@ If the UV changes partway through, the timer adjusts. A swim halves the remainin
 
 Sun dose is a rough estimate: UV × minutes ÷ the skin type's burn threshold. Sunscreen lowers the dose by about a third of its labelled SPF, which reflects how thinly people usually apply it, and only on the share of skin you covered (face 25%, face and arms 60%, full body 100%). These numbers are placeholders for the prototype, not medical guidance.
 
+## Main screen layouts
+
+Switch the Now screen's layout from the simulator panel. All four show the same state and keep the "I Reapplied" button at the bottom.
+
+| Layout | What comes first |
+| --- | --- |
+| **Ring** | The original: a protection ring around the character, countdown underneath |
+| **Hero** | The countdown, top left, with a protection bar and UV pill. An oversized character bleeds off the right edge over a glow in the UV color |
+| **Gauge** | The UV index: a semicircle gauge split into the five WHO categories, with the character inside and "reapply in" and "protected" side by side |
+| **Cards** | Two tinted cards in the watchOS list style: a status card (green, yellow, orange or red as protection runs down) and a UV card with the day's peak |
+
 ## Characters
 
 Pick a character above the mood row on the page. Every character supports every mood, the sunscreen bottle and the tap reactions. Your choice is remembered in this browser.
