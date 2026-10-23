@@ -144,6 +144,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   75% { transform: translateX(1.1px); }
 }
 .bezel { position: absolute; inset: 8px; border-radius: 58px; background: #050505; box-shadow: inset 0 0 0 1px #2A2A2A; }
+/* Paints the bezel over the screen's corners, so layers that escape the rounded clip (glass, blur) stay hidden */
+.screen-frame { position: absolute; inset: 8px; border-radius: 58px; overflow: hidden; pointer-events: none; z-index: 2; }
+.screen-frame::before { content: ""; position: absolute; left: 6px; top: 6px; width: 205px; height: 251px; border-radius: 42px; box-shadow: 0 0 0 40px #050505; }
+.screen-frame::after { content: ""; position: absolute; inset: 0; border-radius: 58px; box-shadow: inset 0 0 0 1px #2A2A2A; }
 .crown-guard { position: absolute; right: -5px; top: 58px; width: 8px; height: 76px; border-radius: 4px; background: linear-gradient(90deg, #8D877D, #C9C3B8 60%, #9C968B); }
 .crown {
   position: absolute; right: -13px; top: 72px; width: 14px; height: 46px; padding: 0; border: 0; border-radius: 5px;
@@ -317,7 +321,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @keyframes iconIn { from { transform: scale(.4); opacity: 0; } }
 .short h3 { margin: 12px 0 2px; font: 600 17px/1.15 var(--sf); position: relative; }
 .short p { margin: 0; font: 400 13px/1.3 var(--sf); color: rgba(255,255,255,.85); position: relative; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.long { overflow-y: auto; scrollbar-width: none; }
+/* Scrolled only by the crown and drag handlers; a native scroller leaks its scrollbar layer past the rounded screen in Chromium */
+.long { overflow: hidden; }
 .long::-webkit-scrollbar { display: none; }
 .long-inner { position: relative; padding: 46px 10px 18px; display: flex; flex-direction: column; gap: 6px; }
 .long .app-icon { position: absolute; left: 14px; top: 8px; width: 32px; height: 32px; }
@@ -387,7 +392,25 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ring-sun { cursor: pointer; }
 .bubble { position: absolute; left: 50%; top: 42px; z-index: 4; padding: 4px 9px; border-radius: 12px; font: 600 11.5px/1.2 var(--sf); white-space: nowrap; transform: translate(-50%, 6px) scale(.8); opacity: 0; pointer-events: none; transition: opacity .2s, transform .35s cubic-bezier(.3,1.5,.5,1); }
 .bubble.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
-.sun .hand { transform-box: view-box; transform-origin: 26px 8px; animation: wave .5s ease-in-out infinite alternate; }
+.sun .hand { transform-box: fill-box; transform-origin: 0% 100%; animation: wave .5s ease-in-out infinite alternate; }
+.ch-mochi:not(.sun--alarmed) .body { transform-box: fill-box; transform-origin: 50% 100%; animation: squish 2.6s ease-in-out infinite; }
+.ch-mochi .halo { transform-box: fill-box; transform-origin: center; animation: halo 3.2s ease-in-out infinite; }
+.ch-tide .waves { animation: tide 3.5s linear infinite; }
+.ch-tide .float { animation: floaty 2.4s ease-in-out infinite; }
+.ch-glyph .rays { animation: spin 60s linear infinite; }
+@keyframes squish { 50% { transform: scale(1.05, .94); } }
+@keyframes halo { 50% { transform: scale(.9); opacity: .7; } }
+@keyframes tide { to { transform: translateX(-15px); } }
+@keyframes floaty { 50% { transform: translateY(-2.5px) rotate(4deg); } }
+
+/* Character picker (page) */
+.chars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.char { display: grid; justify-items: center; gap: 6px; padding: 10px 4px 9px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); text-align: center; font: 500 11.5px/1.25 var(--sf); color: var(--muted); }
+.char:hover { border-color: var(--accent); }
+.char[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.char .char-art { width: 56px; height: 56px; border-radius: 50%; background: #0D0D0F; display: grid; place-items: center; }
+.char .char-art svg { width: 46px; height: 46px; overflow: visible; }
+.char b { display: block; font: 700 13px/1.2 var(--sf); color: var(--ink); }
 @keyframes wave { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
 .card-line { font: 600 14px/1.25 var(--sf); }
 
@@ -443,9 +466,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   <section class="intro" aria-labelledby="intro-title">
     <p class="eyebrow">watchOS 26 prototype</p>
     <h1 id="intro-title">SPF Watch</h1>
-    <p>Sunny watches the UV index and taps your wrist when your sunscreen has worn off. The reapply timer shortens as UV climbs: every 2 hours at low and moderate UV, 100 minutes at high, 90 at very high and 80 at extreme. Swimming cuts it short.</p>
+    <p><span class="js-charname">Sunny</span> watches the UV index and taps your wrist when your sunscreen has worn off. The reapply timer shortens as UV climbs: every 2 hours at low and moderate UV, 100 minutes at high, 90 at very high and 80 at extreme. Swimming cuts it short.</p>
 
-    <h2>Sunny's moods</h2>
+    <h2>Character</h2>
+    <div class="chars" id="chars" role="group" aria-label="Character"></div>
+
+    <h2><span class="js-charname">Sunny</span>'s moods</h2>
     <div class="moods" id="moods"></div>
 
     <h2>Try it</h2>
@@ -608,7 +634,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
             <div class="ob-welcome" id="obWelcome">
               <div class="blobs" style="--blob-a:#FFD60A; --blob-b:#64D2FF; --blob-c:#FF9F0A"></div>
               <div class="ob-sun" id="obSun" data-act="poke" role="button" aria-label="Tap Sunny"></div>
-              <h3>Hi, I'm Sunny</h3>
+              <h3>Hi, I'm <span class="js-charname">Sunny</span></h3>
               <p>I'll watch the UV index and tell you when to reapply sunscreen.</p>
               <button class="capsule tint ob-go" data-act="ob-start">Get Started</button>
             </div>
@@ -663,6 +689,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
             <p id="appliedBody">Next reminder in 1h 40m</p>
           </div>
         </div>
+        <div class="screen-frame"></div>
       </div>
     </div>
   </div>
@@ -780,72 +807,141 @@ button { font: inherit; color: inherit; cursor: pointer; }
   const fmtDur = m => { m = Math.max(0, Math.ceil(m)); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${pad(m % 60)}m`; };
   const fmtHour = h => `${(h % 12) || 12}`;
 
-  // ---------- Sunny, the sun character ----------
+  // ---------- The sun character: four designs share one set of moods ----------
+  const CHARS = [
+    { id: 'sunny', name: 'Sunny', d: 'Classic rays' },
+    { id: 'mochi', name: 'Mochi', d: 'Soft and squishy' },
+    { id: 'tide',  name: 'Tide',  d: 'Rises with the UV' },
+    { id: 'glyph', name: 'Glyph', d: 'Colored by UV' },
+  ];
+  let character = 'sunny';
+  try { const c = localStorage.getItem('spfwatch.character'); if (CHARS.some(x => x.id === c)) character = c; } catch (e) { /* storage unavailable */ }
+  const charName = () => CHARS.find(c => c.id === character).name;
+
   let uid = 0;
   const INK = '#5B2C0F';
-  function sunSVG(mood, { bottle = false } = {}) {
+  // [highlight, mid, edge, rays]
+  const WARM = {
+    sleepy:  ['#FFF4BF', '#FFDC66', '#F4B740', '#FFD45E'],
+    happy:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+    cool:    ['#FFF3A8', '#FFC933', '#FF9A14', '#FFBE36'],
+    hot:     ['#FFE68C', '#FFA22B', '#FF6E1A', '#FFAE3A'],
+    alarmed: ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
+    proud:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+    wave:    ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
+    squint:  ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
+  };
+  // [highlight, mid, edge, halo]: peachy pastels
+  const MOCHI = {
+    sleepy:  ['#FFF7E0', '#FFE3A3', '#F6C07A', '#FFE7A8'],
+    happy:   ['#FFF5D6', '#FFD27A', '#FFA06E', '#FFD98A'],
+    cool:    ['#FFF2CC', '#FFC56B', '#FF9566', '#FFCB7A'],
+    hot:     ['#FFE9C9', '#FFA76E', '#FF6F61', '#FFB08A'],
+    alarmed: ['#FFE9C9', '#FFA76E', '#FF6F61', '#FFB08A'],
+    proud:   ['#FFF5D6', '#FFD27A', '#FFA06E', '#FFD98A'],
+    wave:    ['#FFF5D6', '#FFD27A', '#FFA06E', '#FFD98A'],
+    squint:  ['#FFE9C9', '#FFA76E', '#FF6F61', '#FFB08A'],
+  };
+  // watchOS UV category colors, so the character doubles as the UV readout
+  const GLYPH = { sleepy: '#30D158', happy: '#FFD60A', cool: '#FF9F0A', hot: '#FF453A', alarmed: '#FF453A', proud: '#FFD60A', wave: '#FFD60A', squint: '#BF5AF2' };
+
+  function faceParts(mood, P, ink = INK, cheekOp = .5) {
+    const cheeks = `<ellipse cx="-17.5" cy="7" rx="5" ry="3.2" fill="#FF6F7D" opacity="${cheekOp}"/><ellipse cx="17.5" cy="7" rx="5" ry="3.2" fill="#FF6F7D" opacity="${cheekOp}"/>`;
+    const eyes = `<g fill="${ink}"><ellipse cx="-10" cy="-3" rx="3.3" ry="4.3"/><ellipse cx="10" cy="-3" rx="3.3" ry="4.3"/></g><g fill="#fff"><circle cx="-9" cy="-4.7" r="1.3"/><circle cx="11" cy="-4.7" r="1.3"/></g>`;
+    const smile = `<path d="M-7 7 Q0 14 7 7" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>`;
+    const grin = `<path d="M-9 6 Q0 18 9 6 Z" fill="${ink}"/><path d="M-4.6 11.2 Q0 9 4.6 11.2 Q0 14.6 -4.6 11.2Z" fill="#FF7A8A"/>`;
+    const glasses = `<rect x="-21.5" y="-10" width="17.5" height="11" rx="4.5" fill="#1C1A2E"/><rect x="4" y="-10" width="17.5" height="11" rx="4.5" fill="#1C1A2E"/><rect x="-5" y="-8" width="10" height="2.4" rx="1.2" fill="#1C1A2E"/><path d="M-18 -7.2h4.5M7.5 -7.2h4.5" stroke="#fff" stroke-opacity=".75" stroke-width="1.4" stroke-linecap="round"/>`;
+    const happyEyes = `<path d="M-14 -2 L-10 -6.5 L-6 -2 M6 -2 L10 -6.5 L14 -2" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const wavy = `<path d="M-8 9.5 q2.7 -2.6 5.3 0 t5.3 0 t5.3 0" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
+    const drop = (x, y) => `<path class="drop" d="M${x} ${y - 6} C${x + 3} ${y - 1.5} ${x + 4.5} ${y + 1.5} ${x} ${y + 4} C${x - 4.5} ${y + 1.5} ${x - 3} ${y - 1.5} ${x} ${y - 6}Z" fill="#7FD3FF"/>`;
+    const star = (x, y, s) => `<path class="sparkle" d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s}Z" fill="#fff"/>`;
+    switch (mood) {
+      case 'sleepy': return {
+        face: `<path d="M-14 -2 Q-10 2 -6 -2 M6 -2 Q10 2 14 -2" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/><path d="M-3.5 9 Q0 11.5 3.5 9" fill="none" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/>` + cheeks,
+        extra: `<g class="zz" fill="#fff" font-family="ui-rounded, Nunito, sans-serif" font-weight="900"><text x="25" y="-27" font-size="11">z</text><text x="34" y="-37" font-size="8">z</text></g>` };
+      case 'happy': return { face: eyes + smile + cheeks, extra: '' };
+      case 'cool': return { face: glasses + grin + cheeks, extra: '' };
+      case 'hot': return { face: glasses + wavy + cheeks + drop(25, -13), extra: '' };
+      case 'alarmed': return {
+        face: `<circle cx="-10" cy="-3" r="5.8" fill="#fff"/><circle cx="10" cy="-3" r="5.8" fill="#fff"/><circle cx="-9.4" cy="-2" r="2.7" fill="${ink}"/><circle cx="9.4" cy="-2" r="2.7" fill="${ink}"/><path d="M-15.5 -11 L-6 -14.5 M15.5 -11 L6 -14.5" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="0" cy="11" rx="3.8" ry="4.6" fill="${ink}"/>` + cheeks + drop(-25, -13),
+        extra: '' };
+      case 'wave': return {
+        face: happyEyes + grin + cheeks,
+        extra: `<g class="hand"><path d="M24 6 Q30 0 32 -8" fill="none" stroke="${P[2]}" stroke-width="5" stroke-linecap="round"/><circle cx="32.5" cy="-10" r="5.5" fill="${P[1]}" stroke="${P[2]}" stroke-width="1"/><path d="M39 -19 q3 2 3 6 M42 -23 q4 3 4 9" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></g>` };
+      case 'squint': return {
+        face: `<path d="M-15 -7 L-7 -3 L-15 1 M15 -7 L7 -3 L15 1" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` + wavy + cheeks + drop(25, -13),
+        extra: '' };
+      case 'proud': return { face: happyEyes + grin + cheeks, extra: star(-36, -32, 5) + star(35, -36, 4) + star(39, 24, 4.5) };
+    }
+    return { face: eyes + smile + cheeks, extra: '' };
+  }
+  const bottleArt = (P, hand = true) => `<rect x="-6.5" y="-12" width="13" height="22" rx="4" fill="#fff"/><rect x="-4.5" y="-18" width="9" height="7" rx="2" fill="#FF8A3D"/><rect x="-6.5" y="-3" width="13" height="6.5" fill="#3EC5F0"/>`
+    + (hand ? `<circle cx="-8.5" cy="3.5" r="4" fill="${P[1]}" stroke="${P[2]}" stroke-width=".8"/>` : '');
+
+  function sunSVG(mood, { bottle = false } = {}, ch = character) {
     const id = 'sg' + (++uid);
-    const P = {
-      sleepy:  ['#FFF4BF', '#FFDC66', '#F4B740', '#FFD45E'],
-      happy:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
-      cool:    ['#FFF3A8', '#FFC933', '#FF9A14', '#FFBE36'],
-      hot:     ['#FFE68C', '#FFA22B', '#FF6E1A', '#FFAE3A'],
-      alarmed: ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
-      proud:   ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
-      wave:    ['#FFF6BA', '#FFD43F', '#FFAD1A', '#FFC83A'],
-      squint:  ['#FFE68C', '#FFA22B', '#FF6A1A', '#FFAE3A'],
-    }[mood];
+    const wrap = inner => `<svg class="sun sun--${mood} ch-${ch}" viewBox="-50 -50 100 100" aria-hidden="true">${inner}</svg>`;
+    const grad = (P, cx = '38%', cy = '32%') => `<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="75%"><stop offset="0" stop-color="${P[0]}"/><stop offset=".55" stop-color="${P[1]}"/><stop offset="1" stop-color="${P[2]}"/></radialGradient>`;
+
+    if (ch === 'mochi') {
+      // A squishy, scalloped blob with a soft halo instead of rays
+      const P = MOCHI[mood];
+      const { face, extra } = faceParts(mood, P, INK, .65);
+      let d = '';
+      for (let i = 0; i < 72; i++) {
+        const a = i / 72 * Math.PI * 2, r = 31 + 2.2 * Math.cos(8 * a);
+        d += (i ? 'L' : 'M') + (r * Math.cos(a)).toFixed(2) + ' ' + (r * Math.sin(a) * .94 + 2).toFixed(2);
+      }
+      return wrap(`<defs>${grad(P, '40%', '30%')}<radialGradient id="${id}h"><stop offset=".55" stop-color="${P[3]}" stop-opacity=".55"/><stop offset="1" stop-color="${P[3]}" stop-opacity="0"/></radialGradient></defs>
+        <circle class="halo" r="47" fill="url(#${id}h)"/>
+        <g class="body"><path d="${d}Z" fill="url(#${id})"/><ellipse cx="-11" cy="-14" rx="9" ry="5" fill="#fff" opacity=".45" transform="rotate(-25 -11 -14)"/><g transform="translate(0 4)">${face}</g>${bottle ? `<g transform="translate(24 18) rotate(-16)">${bottleArt(P)}</g>` : ''}</g>${extra}`);
+    }
+
+    if (ch === 'tide') {
+      // The sun sits on the sea: it sinks below the horizon when UV is low and climbs as UV rises
+      const P = WARM[mood];
+      const { face, extra } = faceParts(mood, P);
+      const y = { sleepy: 15, happy: 0, cool: -3, hot: -6, alarmed: -3, proud: -5, wave: -2, squint: -6 }[mood];
+      let rays = '';
+      for (let i = 0; i < 12; i++) rays += `<rect x="-2.6" y="${mood === 'sleepy' ? -34 : -38}" width="5.2" height="${mood === 'sleepy' ? 5 : 8}" rx="2.6" transform="rotate(${i * 30})"/>`;
+      const crest = ' q7.5 -4.5 15 0'.repeat(10), ripple = ' q7.5 -3 15 0'.repeat(10);
+      return wrap(`<defs>${grad(P)}<linearGradient id="${id}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FC9F5"/><stop offset="1" stop-color="#1764C8"/></linearGradient><clipPath id="${id}c"><circle r="47"/></clipPath></defs>
+        <g clip-path="url(#${id}c)">
+          <g transform="translate(0 ${y})"><g class="rays" fill="${P[3]}">${rays}</g><g class="body"><circle r="25" fill="url(#${id})"/><ellipse cx="-8" cy="-13" rx="7" ry="3.8" fill="#fff" opacity=".35" transform="rotate(-28 -8 -13)"/><g transform="scale(.84)">${face}${extra}</g></g></g>
+          <g class="waves"><path d="M-60 20${crest} L90 50 L-60 50Z" fill="url(#${id}w)"/><path d="M-60 27${ripple}" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.4"/></g>
+          <g fill="#FFE27A" opacity=".6"><rect x="-12" y="31" width="24" height="2" rx="1"/><rect x="-7" y="37" width="14" height="2" rx="1"/></g>
+          ${bottle ? `<g transform="translate(28 22) rotate(-12) scale(.8)"><g class="float">${bottleArt(P, false)}</g></g>` : ''}
+        </g>`);
+    }
+
+    if (ch === 'glyph') {
+      // Flat, SF Symbols-style sun; its color is the UV category color
+      const C = GLYPH[mood], P = [C, C, C, C];
+      const { face, extra } = faceParts(mood, P, '#161616', .28);
+      const len = mood === 'sleepy' ? 6 : 9;
+      let rays = '';
+      for (let i = 0; i < 8; i++) rays += `<line x1="0" y1="-31" x2="0" y2="${-31 - len}" transform="rotate(${i * 45})"/>`;
+      return wrap(`<g class="rays" stroke="${C}" stroke-width="5.5" stroke-linecap="round">${rays}</g>
+        <g class="body"><circle r="24" fill="${C}"/><g transform="scale(.8)">${face}</g>${bottle ? `<g transform="translate(23 15) rotate(-16) scale(.9)">${bottleArt(P)}</g>` : ''}</g>${extra}`);
+    }
+
+    // Sunny: the original, with alternating long and short rays
+    const P = WARM[mood];
+    const { face, extra } = faceParts(mood, P);
     let rays = '';
     for (let i = 0; i < 12; i++) {
       let h = i % 2 ? 9 : 13;
       if (mood === 'sleepy') h *= 0.7;
       rays += `<rect x="-3.4" y="${-(33 + h)}" width="6.8" height="${h}" rx="3.4" transform="rotate(${i * 30})"/>`;
     }
-    const cheeks = `<ellipse cx="-17.5" cy="7" rx="5" ry="3.2" fill="#FF6F7D" opacity=".5"/><ellipse cx="17.5" cy="7" rx="5" ry="3.2" fill="#FF6F7D" opacity=".5"/>`;
-    const eyes = `<g fill="${INK}"><ellipse cx="-10" cy="-3" rx="3.3" ry="4.3"/><ellipse cx="10" cy="-3" rx="3.3" ry="4.3"/></g><g fill="#fff"><circle cx="-9" cy="-4.7" r="1.3"/><circle cx="11" cy="-4.7" r="1.3"/></g>`;
-    const smile = `<path d="M-7 7 Q0 14 7 7" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>`;
-    const grin = `<path d="M-9 6 Q0 18 9 6 Z" fill="${INK}"/><path d="M-4.6 11.2 Q0 9 4.6 11.2 Q0 14.6 -4.6 11.2Z" fill="#FF7A8A"/>`;
-    const glasses = `<rect x="-21.5" y="-10" width="17.5" height="11" rx="4.5" fill="#1C1A2E"/><rect x="4" y="-10" width="17.5" height="11" rx="4.5" fill="#1C1A2E"/><rect x="-5" y="-8" width="10" height="2.4" rx="1.2" fill="#1C1A2E"/><path d="M-18 -7.2h4.5M7.5 -7.2h4.5" stroke="#fff" stroke-opacity=".75" stroke-width="1.4" stroke-linecap="round"/>`;
-    const drop = (x, y) => `<path class="drop" d="M${x} ${y - 6} C${x + 3} ${y - 1.5} ${x + 4.5} ${y + 1.5} ${x} ${y + 4} C${x - 4.5} ${y + 1.5} ${x - 3} ${y - 1.5} ${x} ${y - 6}Z" fill="#7FD3FF"/>`;
-    const star = (x, y, s) => `<path class="sparkle" d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s}Z" fill="#fff"/>`;
-
-    let face = '', extra = '';
-    switch (mood) {
-      case 'sleepy':
-        face = `<path d="M-14 -2 Q-10 2 -6 -2 M6 -2 Q10 2 14 -2" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/><path d="M-3.5 9 Q0 11.5 3.5 9" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/>` + cheeks;
-        extra = `<g class="zz" fill="#fff" font-family="ui-rounded, Nunito, sans-serif" font-weight="900"><text x="25" y="-27" font-size="11">z</text><text x="34" y="-37" font-size="8">z</text></g>`;
-        break;
-      case 'happy': face = eyes + smile + cheeks; break;
-      case 'cool': face = glasses + grin + cheeks; break;
-      case 'hot':
-        face = glasses + `<path d="M-8 9.5 q2.7 -2.6 5.3 0 t5.3 0 t5.3 0" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>` + cheeks + drop(25, -13);
-        break;
-      case 'alarmed':
-        face = `<circle cx="-10" cy="-3" r="5.8" fill="#fff"/><circle cx="10" cy="-3" r="5.8" fill="#fff"/><circle cx="-9.4" cy="-2" r="2.7" fill="${INK}"/><circle cx="9.4" cy="-2" r="2.7" fill="${INK}"/><path d="M-15.5 -11 L-6 -14.5 M15.5 -11 L6 -14.5" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="0" cy="11" rx="3.8" ry="4.6" fill="${INK}"/>` + cheeks + drop(-25, -13);
-        break;
-      case 'wave':
-        face = `<path d="M-14 -2 L-10 -6.5 L-6 -2 M6 -2 L10 -6.5 L14 -2" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` + grin + cheeks;
-        extra = `<g class="hand"><path d="M24 6 Q30 0 32 -8" fill="none" stroke="${P[2]}" stroke-width="5" stroke-linecap="round"/><circle cx="32.5" cy="-10" r="5.5" fill="${P[1]}" stroke="${P[2]}" stroke-width="1"/><path d="M39 -19 q3 2 3 6 M42 -23 q4 3 4 9" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></g>`;
-        break;
-      case 'squint':
-        face = `<path d="M-15 -7 L-7 -3 L-15 1 M15 -7 L7 -3 L15 1" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M-8 9.5 q2.7 -2.6 5.3 0 t5.3 0 t5.3 0" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>` + cheeks + drop(25, -13);
-        break;
-      case 'proud':
-        face = `<path d="M-14 -2 L-10 -6.5 L-6 -2 M6 -2 L10 -6.5 L14 -2" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` + grin + cheeks;
-        extra = star(-36, -32, 5) + star(35, -36, 4) + star(39, 24, 4.5);
-        break;
-    }
-    const bottleSVG = bottle ? `<g transform="translate(24 16) rotate(-16)"><rect x="-6.5" y="-12" width="13" height="22" rx="4" fill="#fff"/><rect x="-4.5" y="-18" width="9" height="7" rx="2" fill="#FF8A3D"/><rect x="-6.5" y="-3" width="13" height="6.5" fill="#3EC5F0"/><circle cx="-8.5" cy="3.5" r="4" fill="${P[1]}" stroke="${P[2]}" stroke-width=".8"/></g>` : '';
-
-    return `<svg class="sun sun--${mood}" viewBox="-50 -50 100 100" aria-hidden="true">
-      <defs><radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${P[0]}"/><stop offset=".55" stop-color="${P[1]}"/><stop offset="1" stop-color="${P[2]}"/></radialGradient></defs>
+    return wrap(`<defs>${grad(P)}</defs>
       <g class="rays" fill="${P[3]}">${rays}</g>
-      <g class="body"><circle r="29" fill="url(#${id})"/><ellipse cx="-10" cy="-16" rx="8" ry="4.2" fill="#fff" opacity=".35" transform="rotate(-28 -10 -16)"/>${face}${bottleSVG}</g>
-      ${extra}</svg>`;
+      <g class="body"><circle r="29" fill="url(#${id})"/><ellipse cx="-10" cy="-16" rx="8" ry="4.2" fill="#fff" opacity=".35" transform="rotate(-28 -10 -16)"/>${face}${bottle ? `<g transform="translate(24 16) rotate(-16)">${bottleArt(P)}</g>` : ''}</g>
+      ${extra}`);
   }
   const sunCache = new WeakMap();
   function setSun(el, mood, opts = {}) {
-    const key = mood + (opts.bottle ? '+b' : '');
+    const key = character + ':' + mood + (opts.bottle ? '+b' : '');
     if (sunCache.get(el) === key) return;
     sunCache.set(el, key);
     el.innerHTML = sunSVG(mood, opts);
@@ -905,7 +1001,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
     { mood: 'cool', label: 'UV 6–7', uv: 7 }, { mood: 'hot', label: 'UV 8+', uv: 9 },
     { mood: 'alarmed', label: 'Reapply', remind: true },
   ];
-  $('moods').innerHTML = MOODS.map((m, i) => `<button class="mood" data-i="${i}" aria-label="Show ${m.mood} mood">${sunSVG(m.mood)}<span><b>${m.mood[0].toUpperCase() + m.mood.slice(1)}</b>${m.label}</span></button>`).join('');
+  function renderCharacter() {
+    $('moods').innerHTML = MOODS.map((m, i) => `<button class="mood" data-i="${i}" aria-label="Show ${m.mood} mood">${sunSVG(m.mood)}<span><b>${m.mood[0].toUpperCase() + m.mood.slice(1)}</b>${m.label}</span></button>`).join('');
+    $('chars').innerHTML = CHARS.map(c => `<button class="char" data-char="${c.id}" aria-pressed="${c.id === character}"><span class="char-art">${sunSVG('happy', {}, c.id)}</span><span><b>${c.name}</b>${c.d}</span></button>`).join('');
+    for (const n of document.getElementsByClassName('js-charname')) n.textContent = charName();
+  }
+  renderCharacter();
+  $('chars').addEventListener('click', e => {
+    const b = e.target.closest('.char'); if (!b || b.dataset.char === character) return;
+    character = b.dataset.char;
+    try { localStorage.setItem('spfwatch.character', character); } catch (err) { /* storage unavailable */ }
+    renderCharacter();
+    if (S.overlay === 'applied') setSun(el.appliedSun, 'proud', { bottle: true });
+    if (S.notifKind) { const c = notifCopy(S.notifKind); el.shortIcon.innerHTML = sunSVG(c.mood, { bottle: c.bottle }); el.longIcon.innerHTML = sunSVG(c.mood); }
+    S.poke = { until: performance.now() + 1600, mood: 'wave', text: `Hi, I'm ${charName()}!` };
+    el.bubble.textContent = S.poke.text;
+  });
   $('moods').addEventListener('click', e => {
     const b = e.target.closest('.mood'); if (!b) return;
     const m = MOODS[+b.dataset.i];

@@ -40,7 +40,18 @@ If the UV changes partway through, the timer adjusts. A swim halves the remainin
 
 Sun dose is a rough estimate: UV × minutes ÷ the skin type's burn threshold. Sunscreen lowers the dose by about a third of its labelled SPF, which reflects how thinly people usually apply it, and only on the share of skin you covered (face 25%, face and arms 60%, full body 100%). These numbers are placeholders for the prototype, not medical guidance.
 
-## Sunny's moods
+## Characters
+
+Pick a character above the mood row on the page. Every character supports every mood, the sunscreen bottle and the tap reactions. Your choice is remembered in this browser.
+
+| Character | Concept |
+| --- | --- |
+| **Sunny** | The original: a round sun with alternating long and short rays and a glossy, kawaii face |
+| **Mochi** | A soft, scalloped blob in peachy pastels with a pulsing halo instead of rays. It squishes gently as it breathes |
+| **Tide** | A sun sitting on the sea. It sinks below the horizon at low UV and climbs higher as UV rises; the bottle floats on the waves |
+| **Glyph** | A flat, SF Symbols-style sun filled with the watchOS UV category color (green, yellow, orange, red, purple), so the character is also the UV readout |
+
+## Moods
 
 Sleepy (UV 0–2) · Happy (3–5) · Cool, with sunglasses (6–7) · Hot and sweaty (8+) · Alarmed, holding a bottle (time to reapply) · Proud (just applied).
 
