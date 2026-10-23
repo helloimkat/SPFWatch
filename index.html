@@ -1416,6 +1416,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     // Now page
     setText(el.appTitle, ['UV ' + r + ' · ' + cat.name, 'Forecast', 'Today'][S.page]);
     el.appTitle.style.color = S.page === 0 ? cat.color : '';
+    el.appTitle.hidden = S.page === 0 && layout === 'hero'; // Hero shows UV in its own pill
     el.glow.style.setProperty('--glow', due && r >= 3 ? '#FF453A' : cat.color);
     let mood = r === 0 ? 'sleepy' : (due && r >= 3) ? 'alarmed' : r < 3 ? 'sleepy' : r < 6 ? 'happy' : r < 8 ? 'cool' : 'hot';
     const needs = r >= 3 && (!applied || due);
