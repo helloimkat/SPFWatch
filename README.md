@@ -69,7 +69,7 @@ Pick a character above the mood row on the page. Every character supports every 
 
 | Character | Concept |
 | --- | --- |
-| **Sunny** | The default: a 12-point wavy badge with a flat yellow-to-orange gradient and simple black line-art faces |
+| **Sunny** | The default: a 12-point wavy badge with soft 3D shading (top-left light, deeper rim, glossy highlight) and simple black line-art faces |
 | **Mochi** | A soft, scalloped blob in peachy pastels with a pulsing halo instead of rays. It squishes gently as it breathes |
 | **Tide** | A sun sitting on the sea. It sinks below the horizon at low UV and climbs higher as UV rises; the bottle floats on the waves |
 | **Glyph** | A flat, SF Symbols-style sun filled with the watchOS UV category color (green, yellow, orange, red, purple), so the character is also the UV readout |

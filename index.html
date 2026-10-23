@@ -1088,10 +1088,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
     // Sunny: a 12-point scalloped badge, flat gradient, black line-art faces
     const tone = mood === 'alarmed' ? 'red' : (mood === 'hot' || mood === 'squint') ? 'orange' : 'yellow';
-    const [c0, c1] = SUNNY_TONES[tone];
-    const { face, extra } = sunnyFace(mood);
-    return wrap(`<defs><linearGradient id="${id}" x1=".25" y1="0" x2=".75" y2="1"><stop offset="0" stop-color="${c0}"/><stop offset="1" stop-color="${c1}"/></linearGradient></defs>
-      <g class="body"><path d="${SUNNY_PATH}" fill="url(#${id})"/>${face}${bottle ? `<g transform="translate(25 17) rotate(-16)">${bottleArt([c0, c1, c1])}</g>` : ''}</g>
+    const [lit, c0, c1, rim] = SUNNY_TONES[tone];
+    const { face, extra } = sunnyFace(mood, id);
+    // Soft 3D: key light from the top left, a deeper rim bottom right, a glossy highlight and glint
+    return wrap(`<defs>
+        <radialGradient id="${id}" cx=".4" cy=".32" r=".75" fx=".34" fy=".24"><stop offset="0" stop-color="${lit}"/><stop offset=".38" stop-color="${c0}"/><stop offset=".82" stop-color="${c1}"/><stop offset="1" stop-color="${rim}"/></radialGradient>
+        <radialGradient id="${id}r" cx=".44" cy=".4" r=".62"><stop offset=".72" stop-color="${rim}" stop-opacity="0"/><stop offset="1" stop-color="${rim}" stop-opacity=".55"/></radialGradient>
+        <radialGradient id="${id}h"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      </defs>
+      <g class="body">
+        <path d="${SUNNY_PATH}" fill="url(#${id})"/>
+        <path d="${SUNNY_PATH}" fill="url(#${id}r)"/>
+        <ellipse cx="-11" cy="-18" rx="14" ry="8" fill="url(#${id}h)" transform="rotate(-28 -11 -18)"/>
+        <ellipse cx="-19" cy="-23" rx="3" ry="1.8" fill="#fff" opacity=".85" transform="rotate(-35 -19 -23)"/>
+        ${face}${bottle ? `<g transform="translate(25 17) rotate(-16)">${bottleArt([c0, c0, c1])}</g>` : ''}
+      </g>
       ${extra}`);
   }
 
@@ -1106,18 +1117,23 @@ button { font: inherit; color: inherit; cursor: pointer; }
     }
     return d + 'Z';
   })();
-  const SUNNY_TONES = { yellow: ['#FFDA4F', '#FFB938'], orange: ['#FFB43C', '#FF9629'], red: ['#FF9C3E', '#FF6A1F'] };
-  function sunnyFace(mood) {
+  // [highlight, base, shade, rim]
+  const SUNNY_TONES = {
+    yellow: ['#FFF2A6', '#FFDA4F', '#FFB938', '#F09A1C'],
+    orange: ['#FFDA92', '#FFB43C', '#FF9629', '#E5741A'],
+    red:    ['#FFC796', '#FF9C3E', '#FF6A1F', '#D44C10'],
+  };
+  function sunnyFace(mood, id) {
     const K = '#1E1A16';
     const line = (d, w = 2.3) => `<path d="${d}" fill="none" stroke="${K}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
     const closed = line('M-15 0 Q-10.5 5 -6 0 M6 0 Q10.5 5 15 0');
     const oval = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="1.9" ry="3.2" fill="${K}"/>`;
-    const cheeks = '<circle cx="-17" cy="7" r="5.4" fill="#FF9A3C"/><circle cx="17" cy="7" r="5.4" fill="#FF9A3C"/>';
+    const cheeks = '<circle cx="-17" cy="7" r="5.4" fill="#FF9A3C" opacity=".92"/><circle cx="17" cy="7" r="5.4" fill="#FF9A3C" opacity=".92"/>';
     switch (mood) {
       case 'calm':    return { face: closed + line('M-7 8.5 Q0 14 7 8.5'), extra: '' };
       case 'sleepy':  return {
         face: `<g transform="translate(0 -5)">${closed + line('M-7 8.5 Q0 14 7 8.5')}</g>`,
-        extra: '<g class="cloud" fill="#F7F2E9"><rect x="-47" y="21" width="45" height="14" rx="7"/><circle cx="-20" cy="18" r="12"/><circle cx="-35" cy="23" r="8.5"/><rect x="2" y="21" width="45" height="14" rx="7"/><circle cx="20" cy="18" r="12"/><circle cx="35" cy="23" r="8.5"/></g>' };
+        extra: `<defs><linearGradient id="${id}c" gradientUnits="userSpaceOnUse" x1="0" y1="8" x2="0" y2="36"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E6DCCB"/></linearGradient></defs><g class="cloud" fill="url(#${id}c)"><rect x="-47" y="21" width="45" height="14" rx="7"/><circle cx="-20" cy="18" r="12"/><circle cx="-35" cy="23" r="8.5"/><rect x="2" y="21" width="45" height="14" rx="7"/><circle cx="20" cy="18" r="12"/><circle cx="35" cy="23" r="8.5"/></g>` };
       case 'happy':   return { face: oval(-8, -3) + oval(8, -3) + line('M-12.5 4.5 Q0 18 12.5 4.5', 2.5), extra: '' };
       case 'cool':    return {
         face: `<path d="M-25 -10.5 H25 V-7 Q25 -6 24 -5 L22 1 Q21 4 17 4 H8 Q4 4 3 0 L2 -4.5 H-2 L-3 0 Q-4 4 -8 4 H-17 Q-21 4 -22 1 L-24 -5 Q-25 -6 -25 -7 Z" fill="#141414"/><path d="M-19.5 -6.5 l2.6 -1.4 M7.5 -6.5 l2.6 -1.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>` + line('M-7 9 Q0 14 7 9'),
