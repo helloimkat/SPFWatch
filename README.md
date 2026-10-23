@@ -97,3 +97,16 @@ Tap Sunny for a reaction with a speech bubble and a wrist tap: a wave at normal 
 
 - Scroll over the watch or swipe up and down to turn the Digital Crown. Click the crown to open the watch face.
 - The simulator panel lets you scrub the time of day, change the speed (1×, 60×, 300×), pick the weather, override the UV index, toggle outdoors, switch watch faces, and trigger a swim, a reminder, "due in 14 min" (to watch the Smart Stack reorder), a setup replay or a new day.
+
+## Showcase video
+
+`index.html#showcase` plays a scripted walkthrough on a loop: the watch alone on a warm sunset gradient, Hero layout, Sunny. UV climbs and the countdown runs out, the reminder arrives, you reapply ("Face & arms", then "Protected!"), the crown scrolls through Forecast, Today and Streak, the day counts toward a 14‑day streak, and it scrolls back to the main screen.
+
+`video/spf-watch-showcase.mp4` is that walkthrough rendered at 1080×1080, 30 fps. To regenerate it (needs Node, Playwright and ffmpeg):
+
+```sh
+npm i playwright
+node video/render.js            # optionally pass a Chrome/Chromium executable path
+```
+
+The script captures each frame on Chromium's virtual clock, so the timing is exact no matter how fast the machine is.
