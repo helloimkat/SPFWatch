@@ -40,6 +40,18 @@ If the UV changes partway through, the timer adjusts. A swim halves the remainin
 
 Sun dose is a rough estimate: UV × minutes ÷ the skin type's burn threshold. Sunscreen lowers the dose by about a third of its labelled SPF, which reflects how thinly people usually apply it, and only on the share of skin you covered (face 25%, face and arms 60%, full body 100%). These numbers are placeholders for the prototype, not medical guidance.
 
+## Streak
+
+The fourth page (turn the crown past Today) turns sun safety into a daily streak.
+
+- **A day counts** once UV drops back below 3 in the evening, as long as you never stayed unprotected at UV 3+ for more than 30 minutes. Days without UV 3+ count automatically.
+- **Status card** says whether you're on track, how many minutes you have left to reapply before the day is missed, or that the day was missed.
+- **Week strip** shows the last six days (counted, no UV, saved with a pass, missed) and a ring that fills through today's sun hours.
+- **Badges** at 7, 14, 30 and 60 days, with progress toward the next one. The sample streak starts at 13, so finishing today unlocks *Two Weeks*.
+- **Sun Passes** save a missed day. You start with one and earn another every 7 days.
+
+The simulator has **Jump to sunset** (settle today and see the celebration) and **Miss a reapply** (see the at‑risk and pass flow). **Start new day** rolls the week strip forward and keeps the streak.
+
 ## Main screen layouts
 
 Switch the Now screen's layout from the simulator panel. All four show the same state and keep the "I Reapplied" button at the bottom.

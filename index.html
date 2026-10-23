@@ -212,6 +212,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .page { position: absolute; left: 0; width: 205px; height: 251px; overflow: hidden; }
 .page:nth-child(2) { top: 251px; }
 .page:nth-child(3) { top: 502px; }
+.page:nth-child(4) { top: 753px; }
 
 /* Now */
 .glow { position: absolute; left: 50%; top: 16px; width: 200px; height: 170px; margin-left: -100px; border-radius: 50%; background: radial-gradient(closest-side, var(--glow, #FF9F0A), transparent); opacity: .34; filter: blur(4px); transition: background 1s; pointer-events: none; }
@@ -455,6 +456,34 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .cc-uvcat { font: 600 14px/1.15 var(--sf); transition: color .6s; }
 .cc-uvpeak { font: 500 11.5px/1.2 var(--sf); color: rgba(255,255,255,.6); }
 
+/* Streak */
+.st-head { position: absolute; left: 12px; right: 16px; top: 42px; display: flex; align-items: center; gap: 8px; }
+.st-sun { width: 56px; height: 56px; flex: none; cursor: pointer; }
+.st-sun svg { width: 100%; height: 100%; overflow: visible; }
+.st-num { font: 900 38px/.95 var(--sfr); color: var(--w-tint); font-variant-numeric: tabular-nums; letter-spacing: -1px; transition: color .4s; }
+.st-num.pop { animation: stPop .7s cubic-bezier(.3,1.6,.5,1); }
+@keyframes stPop { 0% { transform: scale(.6); } 60% { transform: scale(1.18); } 100% { transform: none; } }
+.st-cap { margin-top: 2px; font: 500 11.5px/1.2 var(--sf); color: rgba(255,255,255,.6); }
+.st-week { position: absolute; left: 12px; right: 16px; top: 104px; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+.st-week span { display: block; margin-bottom: 3px; font: 600 9.5px/1 var(--sf); color: rgba(255,255,255,.45); }
+.st-week span.today { color: #fff; }
+.st-day { width: 20px; height: 20px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; }
+.st-day svg { width: 12px; height: 12px; }
+.st-day.ring svg { width: 20px; height: 20px; }
+.st-card { position: absolute; left: 10px; right: 14px; top: 144px; padding: 7px 12px; border-radius: 16px; background: var(--w-row); }
+.st-title { font: 600 14px/1.2 var(--sf); transition: color .4s; }
+.st-detail { margin-top: 1px; font: 400 11.5px/1.25 var(--sf); color: rgba(255,255,255,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-bottom { position: absolute; left: 14px; right: 16px; top: 198px; height: 40px; }
+.st-goal { display: flex; align-items: center; gap: 8px; height: 100%; }
+.st-goal svg { width: 26px; height: 26px; flex: none; }
+.st-goal-text { flex: 1; min-width: 0; }
+.st-goal-row { display: flex; justify-content: space-between; gap: 6px; font: 600 12px/1.2 var(--sf); white-space: nowrap; }
+.st-goal-row span + span { color: rgba(255,255,255,.55); font-variant-numeric: tabular-nums; }
+.st-goal-bar { height: 6px; margin-top: 5px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+.st-goal-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--w-tint); transition: width .5s; }
+.st-pass { height: 38px; white-space: nowrap; }
+.st-pass.capsule.prominent { background: var(--w-blue); color: #fff; box-shadow: inset 0 1px .5px rgba(255,255,255,.45), 0 4px 14px rgba(10,132,255,.35); }
+
 /* ---------- Simulator panel ---------- */
 .panel { max-width: 340px; justify-self: start; display: grid; gap: 14px; width: 100%; }
 .group { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; }
@@ -621,8 +650,30 @@ button { font: inherit; color: inherit; cursor: pointer; }
                   <div class="card-line" id="lastApplied">Not yet today</div>
                 </div>
               </section>
+
+              <section class="page" aria-label="Streak">
+                <div class="st-head">
+                  <div class="st-sun" id="stSun" data-act="poke" role="button" aria-label="Tap the sun"></div>
+                  <div><div class="st-num" id="stNum">13</div><div class="st-cap" id="stCap">day streak</div></div>
+                </div>
+                <div class="st-week" id="stWeek"></div>
+                <div class="st-card">
+                  <div class="st-title" id="stTitle">On track today</div>
+                  <div class="st-detail" id="stDetail"></div>
+                </div>
+                <div class="st-bottom">
+                  <div class="st-goal" id="stGoal">
+                    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M7.5 1h4.2l2 6.2-4.1 1.2zM18.5 1h-4.2l-2 6.2 4.1 1.2z" fill="#0A84FF"/><circle cx="13" cy="15.5" r="9" fill="#FFC933"/><circle cx="13" cy="15.5" r="6.6" fill="none" stroke="#E0A000" stroke-width="1"/><path d="M13 10.4l1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5z" fill="#A86400"/></svg>
+                    <div class="st-goal-text">
+                      <div class="st-goal-row"><span id="stGoalName">Two Weeks</span><span id="stGoalCount">13/14</span></div>
+                      <div class="st-goal-bar"><i id="stGoalBar"></i></div>
+                    </div>
+                  </div>
+                  <button class="capsule prominent st-pass" id="stPass" data-act="use-pass" hidden>Use Sun Pass</button>
+                </div>
+              </section>
             </div>
-            <div class="page-dots" id="dots"><i></i><i></i><i></i></div>
+            <div class="page-dots" id="dots"><i></i><i></i><i></i><i></i></div>
             <div class="topbar">
               <button class="glass circle-btn" data-act="settings" aria-label="Settings">
                 <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 6.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8 4.3v-1.8l-2.2-.4a6 6 0 0 0-.6-1.5l1.3-1.8-1.3-1.3-1.8 1.3a6 6 0 0 0-1.5-.6L11.5 2H8.5l-.4 2.2a6 6 0 0 0-1.5.6L4.8 3.5 3.5 4.8l1.3 1.8a6 6 0 0 0-.6 1.5L2 8.5v3l2.2.4c.1.5.3 1 .6 1.5l-1.3 1.8 1.3 1.3 1.8-1.3c.5.3 1 .5 1.5.6l.4 2.2h3l.4-2.2c.5-.1 1-.3 1.5-.6l1.8 1.3 1.3-1.3-1.3-1.8c.3-.5.5-1 .6-1.5z" fill-rule="evenodd"/></svg>
@@ -820,6 +871,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
         <button class="act" id="aRemind"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5v2.8L2 11h12l-1.5-2.2V6A4.5 4.5 0 0 0 8 1.5zM6.3 12.5a1.8 1.8 0 0 0 3.4 0z"/></svg>Send reminder</button>
         <button class="act" id="aFace"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="2" width="9" height="12" rx="3"/><path d="M8 5.5V8l1.6 1" stroke-linecap="round"/></svg>Press crown</button>
         <button class="act" id="aAlmost"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="9" r="5.5"/><path d="M8 6v3h2.2M6 1.5h4"/></svg>Due in 14 min</button>
+        <button class="act" id="aSunset"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 11a4.5 4.5 0 0 1 9 0M1 13.5h14M8 2v3M2.6 5.6l1.6 1.6M13.4 5.6l-1.6 1.6"/></svg>Jump to sunset</button>
+        <button class="act" id="aMiss"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5.8 5.8l4.4 4.4M10.2 5.8l-4.4 4.4"/></svg>Miss a reapply</button>
         <button class="act" id="aSetup"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3.4"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M3 13l1.1-1.1M11.9 4.1 13 3"/></g></svg>Replay setup</button>
         <button class="act" id="aReset"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8a5 5 0 1 0 1.6-3.7"/><path d="M3 2.5v3h3"/></svg>Start new day</button>
       </div>
@@ -874,6 +927,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
     overlay: null, notifKind: null,
     flags: { start: true, reapply: false, shade: false },
     snoozeUntil: null, events: [],
+    // Streak: past full days, plus today's progress
+    streak: 13, best: 18, passes: 1, week: ['done', 'done', 'none', 'done', 'done', 'done'],
+    today: { missed: false, saved: false, done: false }, overdue: 0,
   });
   let S = fresh();
 
@@ -884,6 +940,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
     return peak * Math.pow(Math.sin(Math.PI * (h - 6.5) / 13), 1.6);
   };
   const currentUV = () => S.uvOverride ?? forecast(S.minutes);
+  // Today's sun window: first and last minute the forecast reaches UV 3
+  let winCache = {};
+  const sunWindow = () => {
+    if (winCache.w !== S.weather) {
+      let from = null, to = null;
+      for (let m = DAY_START; m <= DAY_END; m += 5) if (forecast(m) >= 2.5) { from ??= m; to = m; }
+      winCache = { w: S.weather, v: from == null ? null : [from, to] };
+    }
+    return winCache.v;
+  };
+  const STREAK_GRACE = 30; // minutes you can go unprotected at UV 3+ before the day is missed
+  const BADGES = [{ n: 7, name: 'One Week' }, { n: 14, name: 'Two Weeks' }, { n: 30, name: 'Sun Pro' }, { n: 60, name: 'Sun Legend' }];
   const intervalFor = uv => uvCat(uv).interval;
   const remaining = () => S.protection * intervalFor(currentUV());
 
@@ -1042,6 +1110,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
     glow: $('glow'), ringWrap: $('ringWrap'), ringTrack: $('ringTrack'), ringFill: $('ringFill'), homeSun: $('homeSun'),
     statusBig: $('statusBig'), statusCap: $('statusCap'),
     nowPage: $('nowPage'), layoutSeg: $('layoutSeg'),
+    stSun: $('stSun'), stNum: $('stNum'), stCap: $('stCap'), stWeek: $('stWeek'), stTitle: $('stTitle'), stDetail: $('stDetail'),
+    stGoal: $('stGoal'), stGoalName: $('stGoalName'), stGoalCount: $('stGoalCount'), stGoalBar: $('stGoalBar'), stPass: $('stPass'),
     heroSky: $('heroSky'), heroSun: $('heroSun'), heroBig: $('heroBig'), heroCap: $('heroCap'), heroBar: $('heroBar'), heroUvNum: $('heroUvNum'), heroUvCat: $('heroUvCat'),
     gauge: $('gauge'), gaugeSun: $('gaugeSun'), gcL1: $('gcL1'), gcV1: $('gcV1'), gcV2: $('gcV2'),
     ccMain: $('ccMain'), ccLabel: $('ccLabel'), ccBig: $('ccBig'), ccSun: $('ccSun'), ccBar: $('ccBar'), ccUv: $('ccUv'), ccUvNum: $('ccUvNum'), ccUvCat: $('ccUvCat'), ccUvPeak: $('ccUvPeak'), homeBtn: $('homeBtn'), homeBtnLabel: $('homeBtnLabel'),
@@ -1146,6 +1216,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
       const shield = S.protection > 0 ? cov * spfShield + (1 - cov) : 1;
       S.dose += dm * (uv / SKIN[S.skin].base) * shield;
     }
+
+    // Streak: count unprotected minutes at UV 3+, then settle the day once UV drops for the evening
+    if (!S.today.done) {
+      if (uv >= 2.5 && S.outdoors && (!S.log.length || S.protection <= 0)) {
+        S.overdue += dm;
+        if (S.overdue > STREAK_GRACE && !S.today.missed) { S.today.missed = true; logEvent('Streak · missed a reapply'); }
+      }
+      const win = sunWindow();
+      if (S.minutes > (win ? win[1] : 18 * 60)) finishDay();
+    }
+  }
+
+  function settleStreak() {
+    if (S.today.missed) { S.streak = 0; return false; }
+    S.streak += 1; S.best = Math.max(S.best, S.streak);
+    if (S.streak % 7 === 0) S.passes += 1;
+    return true;
+  }
+  function finishDay() {
+    S.today.done = true;
+    if (!settleStreak()) { haptic(); logEvent('Streak reset · a new one starts tomorrow'); return; }
+    const badge = BADGES.find(b => b.n === S.streak);
+    haptic(`Streak +1 · ${S.streak} days`);
+    if (badge) logEvent(`Badge unlocked · ${badge.name}`);
+    if (!S.overlay) {
+      setSun(el.appliedSun, 'proud');
+      el.appliedTitle.textContent = `${S.streak}-day streak!`;
+      el.appliedBody.innerHTML = (badge ? `${badge.name} badge unlocked` : 'Protected all day. See you tomorrow.')
+        + (S.streak % 7 === 0 ? '<br>+1 Sun Pass' : '');
+      showOverlay('applied');
+      clearTimeout(applySunscreen.t);
+      applySunscreen.t = setTimeout(() => { if (S.overlay === 'applied') closeOverlay(); }, 3400);
+    }
+    el.stNum.classList.remove('pop'); void el.stNum.offsetWidth; el.stNum.classList.add('pop');
   }
 
   function runChecks() {
@@ -1190,6 +1294,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     S.coverage = cov;
     S.protection = 1;
     S.log.push(S.minutes);
+    S.overdue = 0;
     S.flags.reapply = false; S.flags.start = true; S.snoozeUntil = null;
     haptic(`Success tap · sunscreen on ${COVER[cov].short}`);
     setSun(el.appliedSun, 'proud', { bottle: true });
@@ -1257,7 +1362,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   }
 
   function setPage(i) {
-    i = Math.max(0, Math.min(2, i));
+    i = Math.max(0, Math.min(3, i));
     if (i === S.page) return;
     S.page = i;
     el.pages.style.transform = `translateY(${-i * 251}px)`;
@@ -1329,6 +1434,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
       case 'cover': closeOverlay(); return applySunscreen(+val);
       case 'cover-cancel': return closeOverlay();
       case 'poke': return poke();
+      case 'use-pass':
+        if (S.passes > 0 && S.today.missed && !S.today.done) {
+          S.passes -= 1; S.today.missed = false; S.today.saved = true; S.overdue = 0;
+          haptic('Sun Pass used · streak saved');
+        }
+        return;
       case 'ob-start': S.onboardStep = 1; return showView('onboard', 'push');
       case 'ob-skin': S.skin = +val; S.onboardStep = 2; return showView('onboard', 'push');
       case 'ob-spf': S.spf = +val; return finishOnboard();
@@ -1414,7 +1525,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     for (const t of el.times) setText(t, clock);
 
     // Now page
-    setText(el.appTitle, ['UV ' + r + ' · ' + cat.name, 'Forecast', 'Today'][S.page]);
+    setText(el.appTitle, ['UV ' + r + ' · ' + cat.name, 'Forecast', 'Today', 'Streak'][S.page]);
     el.appTitle.style.color = S.page === 0 ? cat.color : '';
     el.appTitle.hidden = S.page === 0 && layout === 'hero'; // Hero shows UV in its own pill
     el.glow.style.setProperty('--glow', due && r >= 3 ? '#FF453A' : cat.color);
@@ -1511,6 +1622,48 @@ button { font: inherit; color: inherit; cursor: pointer; }
     setText(el.sunTime, fmtDur(S.sunMinutes));
     setText(el.appCount, `${S.log.length}×`);
     setText(el.lastApplied, applied ? `${fmtClockAP(S.log[S.log.length - 1])} · ${COVER[S.coverage].name}` : 'Not yet today');
+
+    // Streak page
+    {
+      const win = sunWindow(), start = win ? win[0] : 9 * 60, end = win ? win[1] : 18 * 60;
+      const t = S.today, atRisk = !t.done && !t.missed && S.overdue > 0;
+      setText(el.stNum, String(S.streak));
+      el.stNum.style.color = t.missed && !t.done ? '#FF6961' : '';
+      setText(el.stCap, `day streak · best ${S.best}`);
+      let stMood = 'happy', title, detail, tone;
+      if (t.done && t.missed) { title = 'Streak reset'; detail = 'A new streak starts tomorrow'; tone = '#FF6961'; stMood = 'sleepy'; }
+      else if (t.done) { title = 'Today counted'; detail = t.saved ? 'Saved with a Sun Pass' : 'Protected all day'; tone = '#30D158'; stMood = 'proud'; }
+      else if (t.missed) { title = 'Missed a reapply'; detail = S.passes ? `You have ${S.passes} Sun Pass${S.passes > 1 ? 'es' : ''}` : 'Your streak resets at sunset'; tone = '#FF6961'; stMood = 'alarmed'; }
+      else if (atRisk) { title = `Reapply within ${Math.max(1, Math.ceil(STREAK_GRACE - S.overdue))} min`; detail = 'to keep your streak'; tone = '#FF9F0A'; stMood = 'alarmed'; }
+      else { title = 'On track today'; detail = `Counts at ${fmtClockAP(end)}`; tone = '#30D158'; }
+      setText(el.stTitle, title); el.stTitle.style.color = tone;
+      setText(el.stDetail, detail);
+      if (S.page === 3) setSun(el.stSun, poked ? S.poke.mood : stMood);
+
+      const showPass = t.missed && !t.done && S.passes > 0;
+      el.stPass.hidden = !showPass; el.stGoal.hidden = showPass;
+      const next = BADGES.find(b => b.n > S.streak) || BADGES[BADGES.length - 1];
+      setText(el.stGoalName, next.name);
+      setText(el.stGoalCount, `${Math.min(S.streak, next.n)}/${next.n}`);
+      el.stGoalBar.style.width = `${Math.min(100, S.streak / next.n * 100).toFixed(1)}%`;
+
+      const frac = Math.max(0, Math.min(1, (S.minutes - start) / (end - start)));
+      const todayState = t.done ? (t.missed ? 'missed' : t.saved ? 'pass' : 'done') : t.missed ? 'missed' : 'ring:' + Math.round(frac * 20);
+      const key = S.week.join() + '|' + todayState;
+      if (el.stWeek.dataset.key !== key) {
+        el.stWeek.dataset.key = key;
+        const icon = st => {
+          if (st === 'done') return '<div class="st-day" style="background:#FFD60A"><svg viewBox="0 0 12 12" fill="none" stroke="#3A2600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2 5 8.6 9.6 3.4"/></svg></div>';
+          if (st === 'pass') return '<div class="st-day" style="background:#0A84FF"><svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M6 1v10M1.7 3.5l8.6 5M1.7 8.5l8.6-5"/></svg></div>';
+          if (st === 'missed') return '<div class="st-day" style="background:rgba(255,69,58,.25)"><svg viewBox="0 0 12 12" fill="none" stroke="#FF453A" stroke-width="2" stroke-linecap="round"><path d="M3.5 3.5l5 5M8.5 3.5l-5 5"/></svg></div>';
+          if (st === 'none') return '<div class="st-day" style="background:#3A3A3C"><svg viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round"><path d="M3.5 6h5"/></svg></div>';
+          return `<div class="st-day ring"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2.6"/><circle cx="10" cy="10" r="8" fill="none" stroke="#FFD60A" stroke-width="2.6" stroke-linecap="round" pathLength="100" stroke-dasharray="${Math.max(1, frac * 100).toFixed(0)} 100" transform="rotate(-90 10 10)"/></svg></div>`;
+        };
+        const wd = new Date().getDay();
+        el.stWeek.innerHTML = [...S.week, todayState].map((st, i) =>
+          `<div><span class="${i === 6 ? 'today' : ''}">${'SMTWTFS'[(wd - 6 + i + 7) % 7]}</span>${icon(st.startsWith('ring') ? 'ring' : st)}</div>`).join('');
+      }
+    }
 
     // Smart Stack relevance: SPF Watch rises to the top when you need to act soon
     const spfRelevant = r >= 3 && (!applied || due || rem <= 15);
@@ -1693,10 +1846,33 @@ button { font: inherit; color: inherit; cursor: pointer; }
     logEvent('Jumped to 14 minutes before reapply');
   });
   $('aSetup').addEventListener('click', () => { closeOverlay(); S.onboardStep = 0; showView('onboard', 'zoom'); });
+  const showStreak = () => { if (S.view !== 'app') showView('app', 'zoom'); setPage(3); };
+  $('aSunset').addEventListener('click', () => {
+    closeOverlay();
+    const w = sunWindow();
+    S.uvOverride = null; S.minutes = Math.max(S.minutes, (w ? w[1] : 18 * 60) - 3);
+    S.playing = true; if (S.speed < 60) S.speed = 60;
+    showStreak();
+    logEvent('Jumped to just before UV drops');
+  });
+  $('aMiss').addEventListener('click', () => {
+    closeOverlay();
+    if (S.today.done) return logEvent('Today is already settled. Start a new day first.');
+    if (!S.log.length) S.log.push(Math.max(DAY_START, S.minutes - 120));
+    if (currentUV() < 3) S.uvOverride = 7;
+    S.protection = 0; S.flags.reapply = true;
+    S.overdue = STREAK_GRACE + 1; S.today.missed = true;
+    logEvent('Streak · missed a reapply');
+    showStreak();
+  });
   $('aRemind').addEventListener('click', sendReminder);
   $('aFace').addEventListener('click', crownPress);
   $('aReset').addEventListener('click', () => {
-    const keep = { skin: S.skin, spf: S.spf, waterResistant: S.waterResistant, reminders: S.reminders, onlyUV3: S.onlyUV3, speed: S.speed, weather: S.weather };
+    // Settle the day that's ending, then roll the week strip forward
+    if (!S.today.done) settleStreak();
+    const result = S.today.missed ? 'missed' : S.today.saved ? 'pass' : 'done';
+    const keep = { skin: S.skin, spf: S.spf, waterResistant: S.waterResistant, reminders: S.reminders, onlyUV3: S.onlyUV3, speed: S.speed, weather: S.weather,
+      streak: S.streak, best: S.best, passes: S.passes, week: [...S.week.slice(1), result] };
     S = Object.assign(fresh(), keep, {
       minutes: 8 * 60 + 30, protection: 0, log: [], sunMinutes: 0, dose: 0, view: 'app', face: S.face, coverage: S.coverage,
       flags: { start: false, reapply: false, shade: false },
