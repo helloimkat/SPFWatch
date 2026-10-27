@@ -100,7 +100,7 @@ Tap Sunny for a reaction with a speech bubble and a wrist tap: a wave at normal 
 
 ## Showcase video
 
-`index.html#showcase` plays a scripted walkthrough on a loop: the watch alone on a warm sunset gradient, Hero layout, Sunny. UV climbs and the countdown runs out, the reminder arrives, you reapply ("Face & arms", then "Protected!"), the crown scrolls through Forecast, Today and Streak, the day counts toward a 14‑day streak, and it scrolls back to the main screen.
+`index.html#showcase` plays a scripted walkthrough on a loop: the watch alone and perfectly still on a solid light orange background, Hero layout, Sunny. UV climbs and the countdown runs out, the reminder arrives, you reapply ("Face & arms", then "Protected!"), the crown scrolls through Forecast, Today and Streak, the day counts toward a 14‑day streak, and it scrolls back to the main screen.
 
 `video/spf-watch-showcase.mp4` is that walkthrough rendered at 1080×1080, 30 fps. To regenerate it (needs Node, Playwright and ffmpeg):
 

@@ -490,13 +490,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .st-pass.capsule.prominent { background: var(--w-blue); color: #fff; box-shadow: inset 0 1px .5px rgba(255,255,255,.45), 0 4px 14px rgba(10,132,255,.35); }
 
 /* Showcase (#showcase): watch alone on a warm sunset gradient */
-body.showcase {
-  overflow: hidden;
-  background:
-    radial-gradient(90% 70% at 28% 12%, rgba(255, 246, 214, .95) 0%, rgba(255, 246, 214, 0) 60%),
-    radial-gradient(80% 70% at 85% 95%, rgba(255, 128, 110, .55) 0%, rgba(255, 128, 110, 0) 65%),
-    linear-gradient(160deg, #FFE6B5 0%, #FFC896 48%, #FFA582 100%);
-}
+body.showcase { overflow: hidden; background: #FFF0E2; }
+body.showcase .case.buzz { animation: none; }   /* the watch itself never moves */
 body.showcase .intro, body.showcase .panel, body.showcase .stage::before { display: none; }
 body.showcase .stage { display: grid; place-items: center; grid-template-columns: 1fr; min-height: 100vh; max-width: none; padding: 0; }
 body.showcase .device-wrap { outline: none; }
@@ -510,6 +505,57 @@ body.instant * { transition: none !important; }
 .tap-dot { position: absolute; z-index: 40; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(255,255,255,.32); box-shadow: 0 0 0 1.5px rgba(255,255,255,.55); opacity: 0; pointer-events: none; }
 .tap-dot.go { animation: tapDot .6s ease-out; }
 @keyframes tapDot { 0% { opacity: 0; transform: scale(.55); } 25% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35); } }
+
+/* UI motion: pages build in, numbers count up, the character pops on mood changes */
+@keyframes riseIn { from { opacity: 0; transform: translateY(12px); } }
+@keyframes popIn { 0% { opacity: 0; transform: scale(.3); } 70% { transform: scale(1.12); } 100% { transform: none; } }
+@keyframes barGrow { from { transform: scaleY(0); } }
+@keyframes fillIn { from { width: 0; } }
+@keyframes markerIn { from { opacity: 0; transform: translateX(-60px); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(46px) rotate(18deg); } }
+@keyframes sunSwap { 0% { transform: scale(.82) rotate(-6deg); } 60% { transform: scale(1.08) rotate(2deg); } 100% { transform: none; } }
+@keyframes pillPulse { 40% { transform: scale(1.12); } }
+@keyframes sunDrop { 0% { opacity: 0; transform: translateY(-34px) scale(.55); } 60% { opacity: 1; transform: translateY(4px) scale(1.06); } 100% { transform: none; } }
+@keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(.6); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1); } }
+.page.enter .uv-head, .page.enter .chart-x, .page.enter .uv-window,
+.page.enter .card, .page.enter .st-card, .page.enter .st-bottom, .page.enter .st-head,
+.page.enter .hero-text > * { animation: riseIn .55s cubic-bezier(.22,1,.36,1) both; }
+.page.enter .uv-head { animation-delay: .05s; }
+.page.enter .chart i { transform-origin: 50% 100%; animation: barGrow .6s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(.18s + var(--i) * .035s); }
+.page.enter .uv-scale i { animation: markerIn .8s .2s cubic-bezier(.22,1,.36,1) both; }
+.page.enter .chart-x { animation-delay: .4s; }
+.page.enter .uv-window { animation-delay: .5s; }
+.page.enter .card:nth-of-type(1), .page.enter .tiles .card:nth-child(1) { animation-delay: .05s; }
+.page.enter .tiles .card:nth-child(1) { animation-delay: .15s; }
+.page.enter .tiles .card:nth-child(2) { animation-delay: .22s; }
+.page.enter > .card:last-child { animation-delay: .3s; }
+.page.enter .dose-track i, .page.enter .st-goal-bar i { animation: fillIn .9s .25s cubic-bezier(.22,1,.36,1) both; }
+.page.enter .st-week > div { animation: popIn .45s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(.12s + var(--i) * .05s); }
+.page.enter .st-card { animation-delay: .45s; }
+.page.enter .st-bottom { animation-delay: .55s; }
+.page.enter .hero-text > :nth-child(2) { animation-delay: .06s; }
+.page.enter .hero-text > :nth-child(3) { animation-delay: .12s; }
+.page.enter .hero-text > :nth-child(4) { animation-delay: .18s; }
+.page.enter .hero-sun { animation: slideInRight .7s .1s cubic-bezier(.22,1,.36,1) both; }
+.sun.swap { animation: sunSwap .55s cubic-bezier(.3,1.5,.5,1); }
+.hero-uv.pulse { animation: pillPulse .5s cubic-bezier(.3,1.5,.5,1); }
+.overlay.zoom-in .platter, .overlay.zoom-in .long-inner > .capsule, #o-cover.zoom-in .row, .short.zoom-in h3, .short.zoom-in p,
+.sheet.zoom-in h3, .sheet.zoom-in p { animation: riseIn .5s cubic-bezier(.22,1,.36,1) both; }
+.overlay.zoom-in .platter { animation-delay: .06s; }
+.overlay.zoom-in .long-inner > .capsule:nth-of-type(1) { animation-delay: .16s; }
+.overlay.zoom-in .long-inner > .capsule:nth-of-type(2) { animation-delay: .23s; }
+.overlay.zoom-in .long-inner > .capsule:nth-of-type(3) { animation-delay: .3s; }
+#o-cover.zoom-in .row:nth-child(1) { animation-delay: .05s; }
+#o-cover.zoom-in .row:nth-child(2) { animation-delay: .12s; }
+#o-cover.zoom-in .row:nth-child(3) { animation-delay: .19s; }
+.short.zoom-in h3 { animation-delay: .18s; }
+.short.zoom-in p { animation-delay: .26s; }
+.sheet.zoom-in .sheet-sun { animation: sunDrop .75s cubic-bezier(.3,1.4,.5,1) both; }
+.sheet.zoom-in h3 { animation-delay: .25s; }
+.sheet.zoom-in p { animation-delay: .35s; }
+.check.pop { animation: popIn .45s cubic-bezier(.3,1.5,.5,1); }
+.confetti { position: absolute; left: 50%; top: 80px; width: 0; height: 0; pointer-events: none; z-index: 3; }
+.confetti i { position: absolute; left: -3px; top: -4px; width: 6px; height: 9px; border-radius: 2px; background: var(--c); opacity: 0; animation: confetti 1.3s cubic-bezier(.15,.7,.3,1) both; animation-delay: var(--d); }
 
 /* ---------- Simulator panel ---------- */
 .panel { max-width: 340px; justify-self: start; display: grid; gap: 14px; width: 100%; }
@@ -1182,8 +1228,10 @@ body.instant * { transition: none !important; }
   function setSun(el, mood, opts = {}) {
     const key = character + ':' + mood + (opts.bottle ? '+b' : '');
     if (sunCache.get(el) === key) return;
+    const had = sunCache.has(el);
     sunCache.set(el, key);
     el.innerHTML = sunSVG(mood, opts);
+    if (had) el.firstElementChild.classList.add('swap');   // a little pop when the mood changes
   }
 
   // ---------- DOM ----------
@@ -1240,7 +1288,7 @@ body.instant * { transition: none !important; }
 
   // Static chart scaffolding: 7 AM – 7 PM
   const HOURS = Array.from({ length: 13 }, (_, i) => 7 + i);
-  el.chart.innerHTML = HOURS.map(() => '<i></i>').join('');
+  el.chart.innerHTML = HOURS.map((_, i) => `<i style="--i:${i}"></i>`).join('');
   el.chartX.innerHTML = HOURS.map(h => `<span>${[9, 12, 15, 18].includes(h) ? fmtHour(h) + (h === 12 ? 'P' : '') : ''}</span>`).join('');
   const bars = [...el.chart.children];
   const now = new Date();
@@ -1430,7 +1478,22 @@ body.instant * { transition: none !important; }
     for (const [k, n] of Object.entries(nodes)) n.hidden = k !== name;
     const node = nodes[name];
     if (node) { node.classList.remove('zoom-in'); void node.offsetWidth; node.classList.add('zoom-in'); }
+    if (name === 'applied') burstConfetti(el.oApplied);
     if (name === 'long') el.oLong.scrollTop = 0;
+  }
+  function burstConfetti(host) {
+    host.querySelector('.confetti')?.remove();
+    const box = document.createElement('div');
+    box.className = 'confetti';
+    const colors = ['#FFD60A', '#FF9F0A', '#30D158', '#64D2FF', '#FF6F7D', '#FFFFFF'];
+    let html = '';
+    for (let k = 0; k < 22; k++) {
+      const a = (k / 22) * Math.PI * 2 + (k % 3) * .35, dist = 52 + (k * 37 % 40);
+      const dx = Math.cos(a) * dist, dy = Math.sin(a) * dist * .8 + 26;
+      html += `<i style="--c:${colors[k % colors.length]};--dx:${dx.toFixed(1)}px;--dy:${dy.toFixed(1)}px;--r:${(k * 67) % 360 - 180}deg;--d:${(k % 4) * .03}s"></i>`;
+    }
+    box.innerHTML = html;
+    host.appendChild(box);
   }
   function closeOverlay() {
     S.overlay = null; S.notifKind = null;
@@ -1455,7 +1518,17 @@ body.instant * { transition: none !important; }
     S.page = i;
     el.pages.style.transform = `translateY(${-i * 251}px)`;
     el.dots.forEach((d, j) => d.classList.toggle('on', j === i));
+    // Build the arriving page in, and let its headline numbers count up
+    const pg = el.pages.children[i];
+    if (pg) { pg.classList.remove('enter'); void pg.offsetWidth; pg.classList.add('enter'); }
+    S.enterAt = performance.now();
   }
+  // 0 → 1 over the first 0.8 s after a page arrives (eased), for count-up numbers
+  const enterK = page => {
+    if (S.page !== page || S.enterAt == null) return 1;
+    const x = Math.min(1, (performance.now() - S.enterAt) / 800);
+    return 1 - Math.pow(1 - x, 3);
+  };
 
   function sendReminder() {
     closeOverlay();
@@ -1656,6 +1729,10 @@ body.instant * { transition: none !important; }
       el.heroBar.style.width = `${(p * 100).toFixed(1)}%`; el.heroBar.style.background = barColor;
       el.heroSky.style.setProperty('--hero', due && r >= 3 ? '#FF453A' : cat.color);
       setText(el.heroUvNum, String(r)); el.heroUvNum.style.background = cat.color;
+      if (el.heroUvCat.textContent !== `UV ${cat.name}` && el.heroUvCat.textContent !== 'Low') {
+        const pill = el.heroUvCat.parentElement;
+        pill.classList.remove('pulse'); void pill.offsetWidth; pill.classList.add('pulse');
+      }
       setText(el.heroUvCat, `UV ${cat.name}`);
     } else if (layout === 'gauge') {
       const catIdx = UV_CATS.indexOf(cat);
@@ -1682,7 +1759,7 @@ body.instant * { transition: none !important; }
     }
 
     // Forecast page
-    setText(el.uvNum, String(r)); el.uvNum.style.color = cat.color;
+    setText(el.uvNum, String(Math.round(r * enterK(1)))); el.uvNum.style.color = cat.color;
     setText(el.uvCat, cat.name); el.uvCat.style.color = cat.color;
     el.uvMarker.style.left = `${Math.min(100, uv / 12 * 100)}%`;
     const peakKey = S.weather;
@@ -1704,7 +1781,7 @@ body.instant * { transition: none !important; }
 
     // Today page
     const dosePct = Math.round(S.dose * 100);
-    setHTML(el.doseVal, `${dosePct}% <small>of burn limit</small>`);
+    setHTML(el.doseVal, `${Math.round(dosePct * enterK(2))}% <small>of burn limit</small>`);
     el.doseBar.style.width = `${Math.min(100, dosePct)}%`;
     el.doseBar.style.background = dosePct >= 80 ? '#FF453A' : dosePct >= 50 ? '#FF9F0A' : '#FFD60A';
     setText(el.doseFoot, `Skin Type ${SKIN[S.skin].n} · SPF ${spfLabel()}`);
@@ -1716,7 +1793,7 @@ body.instant * { transition: none !important; }
     {
       const win = sunWindow(), start = win ? win[0] : 9 * 60, end = win ? win[1] : 18 * 60;
       const t = S.today, atRisk = !t.done && !t.missed && S.overdue > 0;
-      setText(el.stNum, String(S.streak));
+      setText(el.stNum, String(Math.round(S.streak * enterK(3))));
       el.stNum.style.color = t.missed && !t.done ? '#FF6961' : '';
       setText(el.stCap, `day streak · best ${S.best}`);
       let stMood = 'happy', title, detail, tone;
@@ -1750,7 +1827,7 @@ body.instant * { transition: none !important; }
         };
         const wd = new Date().getDay();
         el.stWeek.innerHTML = [...S.week, todayState].map((st, i) =>
-          `<div><span class="${i === 6 ? 'today' : ''}">${'SMTWTFS'[(wd - 6 + i + 7) % 7]}</span>${icon(st.startsWith('ring') ? 'ring' : st)}</div>`).join('');
+          `<div style="--i:${i}"><span class="${i === 6 ? 'today' : ''}">${'SMTWTFS'[(wd - 6 + i + 7) % 7]}</span>${icon(st.startsWith('ring') ? 'ring' : st)}</div>`).join('');
       }
     }
 
@@ -2017,7 +2094,6 @@ body.instant * { transition: none !important; }
       await wait(280);
       target.classList.remove('pressed');
     }
-    let crownTurn = 0;
     // Scroll with a JS-driven ease rather than the CSS transition, so a virtual-time recorder sees every frame
     async function crownTo(i) {
       const from = S.page, dur = 550, t0 = performance.now();
@@ -2027,11 +2103,9 @@ body.instant * { transition: none !important; }
       for (;;) {
         const x = Math.min(1, (performance.now() - t0) / dur), k = ease(x);
         el.pages.style.transform = `translateY(${-(from + (i - from) * k) * 251}px)`;
-        el.crown.style.setProperty('--crown-shift', `${crownTurn + (i - from) * 14 * k}px`);
         if (x >= 1) break;
         await new Promise(r => requestAnimationFrame(r));
       }
-      crownTurn += (i - from) * 14;
       el.pages.style.transition = '';
     }
     function resetScene() {
@@ -2061,7 +2135,12 @@ body.instant * { transition: none !important; }
       S.playing = false; S.speed = 60;
       await wait(1600); showOverlay('long');
       await wait(1400); await tap(el.longPrimary); act('notif-primary');
-      await wait(1100); await tap(el.coverList.querySelector('[data-val="1"]')); act('cover', '1');
+      await wait(1100);
+      const pick = el.coverList.querySelector('[data-val="1"]');
+      await tap(pick);
+      const chk = el.coverList.querySelector('.check');
+      if (chk) { pick.appendChild(chk); chk.classList.add('pop'); }
+      await wait(500); act('cover', '1');
       await wait(2300); closeOverlay();
       S.playing = true;
       await wait(1100); crownTo(1);                       // Forecast

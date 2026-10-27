@@ -46,8 +46,9 @@ const out = process.argv[4] || path.join(__dirname, 'spf-watch-showcase.mp4');
   await browser.close();
 
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(framesDir, 'f%04d.png'),
-    '-vf', `scale=${SIZE}:${SIZE}:flags=lanczos,format=yuv420p`, '-c:v', 'libx264', '-preset', 'slow', '-crf', '16',
+    // Small file: flat UI on a solid background compresses well at a high CRF
+    '-vf', `scale=${SIZE}:${SIZE}:flags=lanczos,format=yuv420p`, '-c:v', 'libx264', '-preset', 'veryslow', '-tune', 'animation', '-crf', '27',
     '-movflags', '+faststart', out], { stdio: 'inherit' });
-  fs.rmSync(framesDir, { recursive: true, force: true });
+  if (!process.env.KEEP_FRAMES) fs.rmSync(framesDir, { recursive: true, force: true });
   console.log('wrote', out);
 })();
